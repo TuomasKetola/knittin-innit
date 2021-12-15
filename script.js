@@ -1,25 +1,31 @@
 let width, height;
 let pixels = [];
 let coloredPixels = [];
-let filledRectsCanvas1 = [];
+let filledRectsCanvasTop = [];
+let filledRectsCanvasBottom = [];
 let filledRectsCanvas2 = [];
 let filledRectsCanvas3 = [];
 let mouseDownX = 1;
 let mouseDownY = 1;
-let drag = false;
+let drop = false;
 let mouseDown = false;
+let minY = 10000;
+let minX = 10000;
+
+let dropY = 1;
+let dropX = 1;
 
 function resizeCanvas(div, canvas){
 
-  
   var bw = div.clientWidth;
-  var bh = div.clientHeight;
-  
+  var bh = div.clientHeight;  
   canvas.width = bw;
   canvas.height = bh;
 }
+
 const div1 = document.getElementById('div1')
-div1.canvas1 = document.createElement('canvas');
+div1.canvasTop = document.createElement('canvas');
+div1.canvasBottom = document.createElement('canvas');
 
 const div2 = document.getElementById('div2')
 div2.canvas2 = document.createElement('canvas');
@@ -27,11 +33,14 @@ div2.canvas2 = document.createElement('canvas');
 const div3 = document.getElementById('div3')
 div3.canvas3 = document.createElement('canvas');
 
-resizeCanvas(div1, canvas1)
+
+resizeCanvas(div1, canvasTop)
+resizeCanvas(div1, canvasBottom)
 resizeCanvas(div2, canvas2)
 resizeCanvas(div3, canvas3)
 
-const ctx1 = canvas1.getContext('2d');
+const ctxTop = canvasTop.getContext('2d');
+const ctxBottom = canvasBottom.getContext('2d');
 const ctx2 = canvas2.getContext('2d');
 const ctx3 = canvas3.getContext('2d');
 var bw = div1.clientWidth;
@@ -65,14 +74,11 @@ function clickDrawToCanvas(canvas, event, cw, ctx, filledRects) {
   let new_coords = [cy, cx].toString()
   const find = filledRects.includes(new_coords)
   ctx.beginPath();
-
-  // console.log(drag)
   if (find){
     
     const ix = filledRects.indexOf(new_coords);
     ctx.fillStyle = "white";
     ctx.fillRect(cx, cy, cw, cw);  
-    ctx.strokeRect(cx, cy, cw, cw);
     filledRects.splice(ix, 1)
   }
   else {
@@ -80,79 +86,40 @@ function clickDrawToCanvas(canvas, event, cw, ctx, filledRects) {
     ctx.fillRect(cx, cy, cw, cw);
     filledRects.push(new_coords) 
   };
-  // console.log(cy,cx)
+  if (cx < minX) {
+    minX = cx
   }
+  if (cy < minY) {
+    minY = cy
+  }
+}
 
-function createTempCanvas(canvas) {
-  div1.canvas1Temp = document.createElement('canvas');
-
-  // const div = document.createElement('canvas');
-  resizeCanvas(div1, canvas1Temp)
+function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
   const rect = canvas.getBoundingClientRect();
-  const tempCtx = canvas1Temp.getContext('2d');
-  for (const x of filledRectsCanvas1) {
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+  const mouseY = (y - (y%cw)) + p;
+  const mouseX = (x - (x%cw)) + p;
+
+  console.log(mouseX, mouseY)
+  for (const x of filledRects) {
     coords = x.split(',');
-    y_ = coords[0];
-    x_ = coords[1];
-    tempCtx.fillStyle = "green";
-    tempCtx.fillRect(x_, y_, cw+10, cw+10);
-    console.log(y_,x_)
+    y_ = coords[0] - minY  + mouseY;
+    x_ = coords[1] - minX;
+    ctx.fillStyle = "green";
+    ctx.fillRect(x_, y_, cw, cw);
   }
 }
 
-function dragOnCanvas1(canvas, event, ctx) {
-  const rect = canvas1.getBoundingClientRect();
-  const curr_x = event.clientX - rect.left;
-  const curr_y = event.clientY - rect.top;
-  console.log('moving', curr_x, curr_y, mouseDownX, mouseDownY)
-}
-
-
-// canvas1.addEventListener('mousedown', () => drag = false, mouseDown = true, console.log("wtf"))
-canvas1.addEventListener('mousedown', function(e) {
-  drag = false;
-  mouseDown = true;
-  const rect = canvas1.getBoundingClientRect();
-  mouseDownX = e.clientX - rect.left;
-  mouseDownY = e.clientY - rect.top;
-  createTempCanvas(canvas1)
-  // console.log('wtf')
-})
-// canvas1.addEventListener('mousemove', () => drag = true)
-canvas1.addEventListener('mousemove', function(e) {
-  drag = true
-  console.log(mouseDown)
-  if (mouseDown){
-    dragOnCanvas1(canvas1, e, ctx3)
-  }
-
-})
-canvas1.addEventListener('mouseup', function(e){
-  if (!drag) {
-    clickDrawToCanvas(canvas1, e, cw, ctx1, filledRectsCanvas1)
-  }
-  mouseDown = false
+canvasTop.addEventListener('click', function(e) {
+  clickDrawToCanvas(canvasBottom, e, cw, ctxBottom, filledRectsCanvasTop);
+  clickDrawToCanvas(canvasTop, e, cw, ctxTop, filledRectsCanvasBottom);
 })
 
+canvasTop.addEventListener('dragend', function(e) {
+  drawFigToCanvas(canvas3, e, cw, ctx3, filledRectsCanvasTop)
+})
 
-// canvas3.addEventListener('mousedown', () => drag = false, mouseDown = true)
-// canvas3.addEventListener('mousemove', function(e) {
-//   drag = true
-//   if (mouseDown){
-//     // console.log(mouseDown)
-//     dragOnCanvas1(canvas3, e, ctx3)
-//   }
-
-// })
-// canvas3.addEventListener('mouseup', function(e){
-//   if (!drag) {
-//     clickDrawToCanvas(canvas3, e, cw, ctx3, filledRectsCanvas3)
-//   }
-//   mouseDown = false
-// })
-
-drawBoard(16, 16, cw, ctx1)
+drawBoard(16, 16, cw, ctxBottom)
 drawBoard(16, 16, cw, ctx2)
 drawBoard(32, 32, cw, ctx3)
-
-// console.log(drag)
