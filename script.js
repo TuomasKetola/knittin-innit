@@ -7,13 +7,35 @@ let filledRectsCanvas2 = [];
 let filledRectsCanvas3 = [];
 let mouseDownX = 1;
 let mouseDownY = 1;
+let mouseToDragY = 1;
 let drop = false;
 let mouseDown = false;
 let minY = 10000;
+let maxY = 1;
 let minX = 10000;
+let maxX = 1;
 
 let dropY = 1;
 let dropX = 1;
+
+let mainCanvasWidth = 36;
+let mainCanvasHeight = 42;
+let smallCanvasWidth = 18;
+let smallCanvasHeight = 18;
+
+
+
+
+function dropDownGridSize() {
+  document.getElementById("myDropdown").classList.toggle("show")
+}
+
+
+
+
+
+
+
 
 function resizeCanvas(div, canvas){
 
@@ -49,10 +71,12 @@ var p = 2;
 var cw = 15;
 var ch = bh + (p*2) + 1;
 
+
+
 function drawBoard(gridWidth, gridHeight, cellWidth, ctx){
     for (var x = 0; x <= cellWidth * gridWidth; x += cellWidth) {
         ctx.moveTo(0.5 + x + p, p);
-        ctx.lineTo(0.5 + x + p, 15 * gridWidth + p);
+        ctx.lineTo(0.5 + x + p, 15 * gridHeight + p);
     } 
 
     for (var x = 0; x <= cellWidth * gridHeight; x += cellWidth) {
@@ -92,7 +116,16 @@ function clickDrawToCanvas(canvas, event, cw, ctx, filledRects) {
   if (cy < minY) {
     minY = cy
   }
+
+  if (cy > maxY) {
+    maxY = cy
+  }
+  if (cx > maxX) {
+    maxX = cx
+  }
 }
+
+
 
 function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
   const rect = canvas.getBoundingClientRect();
@@ -100,16 +133,27 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
   const y = event.clientY - rect.top;
   const mouseY = (y - (y%cw)) + p;
   const mouseX = (x - (x%cw)) + p;
-
-  console.log(mouseX, mouseY)
-  for (const x of filledRects) {
-    coords = x.split(',');
-    y_ = coords[0] - minY  + mouseY;
-    x_ = coords[1] - minX;
-    ctx.fillStyle = "green";
-    ctx.fillRect(x_, y_, cw, cw);
-  }
+  const shapeSize = (maxX - minX + cw) / cw;
+  const nrReps = mainCanvasWidth / shapeSize
+  for(let i = 0; i <= nrReps - 1; i++) {
+    console.log("i: ", i)
+    for (const x of filledRects) {
+      coords = x.split(',');   
+      y_ = coords[0] - minY + mouseY - (mouseToDragY - minY);
+      x_ = (coords[1] - minX + p) + i * shapeSize * cw;
+      ctx.fillStyle = "green";
+      ctx.fillRect(x_, y_, cw, cw);
+      console.log(x_)
+    }
+  }  
 }
+
+canvasTop.addEventListener('mousedown', function(e) {
+  const rect = canvasTop.getBoundingClientRect();
+  const y = e.clientY - rect.top;
+  mouseToDragY = (y - (y%cw)) + p;
+  console.log('here')
+})
 
 canvasTop.addEventListener('click', function(e) {
   clickDrawToCanvas(canvasBottom, e, cw, ctxBottom, filledRectsCanvasTop);
@@ -120,6 +164,8 @@ canvasTop.addEventListener('dragend', function(e) {
   drawFigToCanvas(canvas3, e, cw, ctx3, filledRectsCanvasTop)
 })
 
-drawBoard(16, 16, cw, ctxBottom)
-drawBoard(16, 16, cw, ctx2)
-drawBoard(32, 32, cw, ctx3)
+
+
+drawBoard(smallCanvasWidth, smallCanvasHeight, cw, ctxBottom)
+drawBoard(smallCanvasWidth, smallCanvasHeight, cw, ctx2)
+drawBoard(mainCanvasWidth, mainCanvasHeight, cw, ctx3)
