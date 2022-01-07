@@ -12,6 +12,40 @@
     <!-- <canvas id="canvas"></canvas> -->
     <div class="options "> 
     </div>
+    <div id="selectDiv1">
+        <label for="mainDims"> Choose size for main canvas</label>
+        <select name="mainDims" id="mainDims" onchange="changeMainCanvasSizes()" > 
+            <option value="36x42">36x42</option>
+            <option value="32x42">32x42</option>
+            <option value="10x42">10x42</option>
+        </select>
+    </div>
+    <div id="selectDiv2">
+        <label for="drawingDims"> Choose size for drawing canvas</label>
+        <select name="drawingDims" id="drawingDims" onchange="changeDrawingCanvasSizes()">
+            <option value="36x42">36x42</option>
+            <option value="18x42" selected="selected">18x42</option>
+            <option value="12x42">12x42</option>
+            <option value="9x42">9x42</option>
+            <option value="6x42">6x42</option>
+            <option value="4x42">4x42</option>
+            <option value="3x42">3x42</option>
+            <option value="2x42">2x42</option>
+        </select>
+    </div>
+    <div>
+        <input type="color" id="background-color" onchange="changeBackground()" 
+        name="background-color" value="#FFFFFF">
+        <label for="background-color">Taustavari</label>
+    </div>
+    <div>
+        <input type="color" id="drawing-color" onchange="changeDrawingColor()" 
+        name="drawing-color" value="#00FF00">
+        <label for="drawing-color">Piirustusvari</label>
+    </div>
+    <button id="undoDrawing" onclick="undoDraw()">takaisin pieni</button>
+    <button id="undoMain" onclick="undoMain()">takaisin suuri</button>
+    <button id="undoMain" onclick="clearDraw()">clear pieni</button>
     <div class="wrapper">
         <div id="div1" class="template1">
             <canvas id="canvasBottom" class="bottomCanvas"></canvas>
