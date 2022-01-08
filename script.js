@@ -16,6 +16,8 @@ let smallCanvasWidth = 18;
 let smallCanvasHeight = 18;
 let drawingCanvasWidth = 18;
 
+let selectingColor = false;
+
 // get canvas to fit div
 function resizeCanvas(div, canvas){
 
@@ -241,6 +243,7 @@ function redrawRects(ctx, filledRects) {
 function clearCanvas(canvas, ctx, filledRects) {
   // ctx.fillStyle = backgroundColor;
   // ctx.fillRect(0, 0, canvas.width, canvas.height);
+  minY = 10000; maxY = 1; minX = 10000; maxX = 1;
   for (const x of filledRects) {
     coords = x.split(',');   
     y_ = Number(coords[0]);
@@ -252,6 +255,9 @@ function clearCanvas(canvas, ctx, filledRects) {
 function clearDraw() {
   clearCanvas(canvasBottom, ctxBottom, filledRectsCanvasBottom);
   clearCanvas(canvasTop, ctxTop, filledRectsCanvasTop);
+  filledRectsCanvasBottom = [];
+  filledRectsCanvasTop = [];
+
   // drawBoard(smallCanvasWidth, smallCanvasHeight, cw, ctxBottom);
 }
 
@@ -280,6 +286,21 @@ function undoMain() {
   mainPatternSizes.pop();
 }
 
+function selectColorFromCanvas() {
+  if (selectingColor) {
+    selectingColor = false;
+  }
+  else {
+    selectingColor = true;
+  }
+}
+
+function rgbToHex(r, g, b) {
+  if (r > 255 || g > 255 || b > 255)
+      throw "Invalid color component";
+  return ((r << 16) | (g << 8) | b).toString(16);
+}
+
 // listener for dragging
 canvasTop.addEventListener('mousedown', function(e) {
   const rect = canvasTop.getBoundingClientRect();
@@ -289,8 +310,18 @@ canvasTop.addEventListener('mousedown', function(e) {
 
 // listener for clicking
 canvasTop.addEventListener('click', function(e) {
-  clickDrawToCanvas(canvasBottom, e, cw, ctxBottom, filledRectsCanvasTop);
-  clickDrawToCanvas(canvasTop, e, cw, ctxTop, filledRectsCanvasBottom);
+  if (selectingColor) {
+    const rect = canvasTop.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    var pixelData = ctxTop.getImageData(x, y, 1, 1).data; 
+    var hex = "#" + ("000000" + rgbToHex(pixelData[0], pixelData[1], pixelData[2])).slice(-6);
+    drawingColor = hex;
+  }
+  else {
+    clickDrawToCanvas(canvasBottom, e, cw, ctxBottom, filledRectsCanvasTop);
+    clickDrawToCanvas(canvasTop, e, cw, ctxTop, filledRectsCanvasBottom);
+  }
 })
 
 // listener for dragend
@@ -300,6 +331,17 @@ canvasTop.addEventListener('dragend', function(e) {
 
 
 
+canvas3.addEventListener('click', function(e) {
+  if (selectingColor) {
+    const rect = canvas3.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    var pixelData = ctx3.getImageData(x, y, 1, 1).data; 
+    var hex = "#" + ("000000" + rgbToHex(pixelData[0], pixelData[1], pixelData[2])).slice(-6);
+    drawingColor = hex;
+  }
+}
+)
 
 drawBoard(smallCanvasWidth, smallCanvasHeight, cw, ctxBottom)
 drawBoard(smallCanvasWidth, smallCanvasHeight, cw, ctx2)
