@@ -1,34 +1,31 @@
+body { 
+  margin: 10 auto; 
+  width: 900px; 
+}
 canvas {
     position: absolute;
     z-index: 1
-    /* width: 90%;
-    height: 90%; */
   }
 .wrapper {
   display: grid;
   grid-template-columns: repeat(3, 1fr, auto-fit);
-  /* gap: 10px; */
-  grid-auto-rows: minmax(100px, auto);
+  gap: 10px;
+  position:relative;
+  grid-auto-rows: minmax(10px, auto);
+
 }
+
 .template1 {
   grid-column: 1;
-  grid-row: 2 / 4;
-  border-bottom: 1px solid black;
-  border-top: 1px solid black;
-  border-left: 1px solid black;
+  grid-row: 4 / 6;
+  height: 290px
 }
 .template2 {
   grid-column: 1;
   grid-row: 4 / 6;
-  border-bottom: 1px solid black;
-  border-left: 1px solid black;
-  /* border-top: 1px solid black; */
 }
 .template3 {
   grid-column: 2 / 4;
   grid-row: 2 / 8;
-  border-left: 1px solid black;
-  border-top: 1px solid black;
-  border-bottom: 1px solid black;
-  border-right: 1px solid black;
+  height: 649px
 }

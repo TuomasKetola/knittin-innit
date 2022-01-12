@@ -9,28 +9,36 @@
 </head>
 <body>
     <h1>Villapaidan Suunittelija</h1>
-    <!-- <canvas id="canvas"></canvas> -->
     <div class="options "> 
     </div>
     <div id="selectDiv1">
         <label for="mainDims"> Choose size for main canvas</label>
         <select name="mainDims" id="mainDims" onchange="changeMainCanvasSizes()" > 
-            <option value="36x42">36x42</option>
-            <option value="32x42">32x42</option>
-            <option value="10x42">10x42</option>
+            <option value="36">36</option>
+            <option value="32">32</option>
+            <option value="10">10</option>
         </select>
+    </div>
+    <div>
+        <form>
+            <label for="mainX">Paakuvion silmukka maara</label><br>
+            <input type="number" id="mainX" name="mainX" value="36" onchange="changeMainX()"><br>
+            <label for="mainY">Paakuvion rivi maara</label><br>
+            <input type="number" id="mainY" name="mainY" value="42" onchange="changeMainY()"><br>
+            <label for="smallY">Pienen kuvion rivi maara</label><br>
+            <input type="number" id="smallY" name="smallY" value="18" onchange="changeSmallY()">
+          </form> 
     </div>
     <div id="selectDiv2">
         <label for="drawingDims"> Choose size for drawing canvas</label>
         <select name="drawingDims" id="drawingDims" onchange="changeDrawingCanvasSizes()">
-            <option value="36x42">36x42</option>
-            <option value="18x42" selected="selected">18x42</option>
-            <option value="12x42">12x42</option>
-            <option value="9x42">9x42</option>
-            <option value="6x42">6x42</option>
-            <option value="4x42">4x42</option>
-            <option value="3x42">3x42</option>
-            <option value="2x42">2x42</option>
+            <option value="18" >18</option>
+            <option value="12">12</option>
+            <option value="9">9</option>
+            <option value="6">6</option>
+            <option value="4" selected="selected">4</option>
+            <option value="3">3</option>
+            <option value="2">2</option>
         </select>
     </div>
     <div>
@@ -47,13 +55,11 @@
     <button id="undoMain" onclick="undoMain()">takaisin suuri</button>
     <button id="clearDraw" onclick="clearDraw()">clear pieni</button>
     <button id="selectColor" onclick="selectColorFromCanvas()">valitse vari kuviosta</button>
-    <div class="wrapper">
+    <button id="deduction" onclick="deducationBool()">vahennys</button>
+    <div class="wrapper" id ="canvasWrapper">
         <div id="div1" class="template1">
             <canvas id="canvasBottom" class="bottomCanvas"></canvas>
             <canvas id="canvasTop" class="topCanvas" draggable="true"></canvas>
-        </div>
-        <div id="div2" class="template2">
-            <canvas id="canvas2"  class="topCanvas"></canvas>
         </div>
         <div id="div3" class="template3">
             <canvas id="canvas3"  class="topCanvas"></canvas>
