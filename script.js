@@ -15,11 +15,13 @@ let mainCanvasWidth = 36;
 let mainCanvasHeight = 42;
 let smallCanvasWidth = 4;
 let smallCanvasHeight = 18;
+let drawingCanvasHeight = 18;
 let drawingCanvasWidth = 4;
 
 let selectingColor = false;
+let findDeduction = false;
 let addingDeduction = false;
-
+let deductionYs = [];
 // get canvas to fit div
 function resizeCanvas(div, canvas){
 
@@ -88,7 +90,7 @@ function drawBoard(gridWidth, gridHeight, cellWidth, ctx){
   for (const ded of deductions) {
     coords = ded.split(',');
     deductionX = Number(coords[0]); deductionY = Number(coords[1]);
-    ctx.clearRect(deductionX+1, 0, cw-1, deductionY)
+    ctx.clearRect(deductionX+1, 0, cw-1, deductionY+cw)
     }
 }
 
@@ -99,22 +101,24 @@ function clickDrawToCanvas(canvas, event, cw, ctx, filledRects) {
   const y = event.clientY - rect.top;
   const cy = (y - (y%cw)) + p;
   const cx = (x - (x%cw)) + p;
-  let new_coords = [cy, cx,drawingColor].toString()
-  const find = filledRects.includes(new_coords)
+  let new_coords = [cy, cx,drawingColor].toString();
+  const find = filledRects.includes(new_coords);
   ctx.beginPath();
-  if (cx < minX) {
-    minX = cx
-  }
-  if (cy < minY) {
-    minY = cy
-  }
-  if (cy > maxY) {
-    maxY = cy
-  }
-  if (cx > maxX) {
-    maxX = cx
-  };
-  if (cx < drawingCanvasWidth * cw) { // make sure the drawing is on the canvas
+
+  // make sure the drawing is on the canvas
+  if (cx < drawingCanvasWidth * cw && cy < drawingCanvasHeight * cw) { 
+    if (cx < minX) {
+      minX = cx
+    }
+    if (cy < minY) {
+      minY = cy
+    }
+    if (cy > maxY) {
+      maxY = cy
+    }
+    if (cx > maxX) {
+      maxX = cx
+    };
     if (find){
       
       const ix = filledRects.indexOf(new_coords);
@@ -148,21 +152,36 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
   const mouseX = (x - (x%cw)) + p;
   const shapeSize = (maxX - minX + cw) / cw;
   const nrReps = mainCanvasWidth / shapeSize;
+  
   var patternSize = 0;
+  let addOn = 0;
   if (mouseX > 0) { // make sure on the right canvas
     for(let i = 0; i <= nrReps - 1; i++) {
+      
       for (const x of filledRects) {
-        coords = x.split(',');   
+        coords = x.split(',');
         y_ = coords[0] - minY + mouseY - (mouseToDragY - minY);
         x_ = (coords[1] - minX + p) + i * shapeSize * cw;
+        
+        // make sure to jump over deductions
+        for (const coordString of deductions) {
+          coordsDeduction = coordString.split(',');
+          coordsDedX = coordsDeduction[0]; coordsDedY = coordsDeduction[1];
+          if (x_ + addOn == coordsDedX && y_ < coordsDedY) {
+            addOn += cw;
+          }
+        }
+        x_ += addOn;
+        // 
         color = coords[2];
-        new_coordsMain = [y_, x_,color].toString()
-
-        filledRectsCanvas3.push(new_coordsMain);
-        patternSize += 1;
-
-        ctx.fillStyle = color;
-        ctx.fillRect(x_+1, y_+1, cw-1, cw-1);
+         // dont draw outside canvas
+        if (x_+1 < mainCanvasWidth * cw && y_ < mainCanvasHeight * cw) {
+          new_coordsMain = [y_, x_,color].toString()
+          filledRectsCanvas3.push(new_coordsMain);
+          patternSize += 1;
+          ctx.fillStyle = color;
+          ctx.fillRect(x_+1, y_+1, cw-1, cw-1);
+        }
       }
     }
     mainPatternSizes.push(patternSize);
@@ -170,17 +189,17 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
 }
 
 
-function changeCanvasBackground(canvas, ctx, color) {
+function changeCanvasBackground(ctx, color, height, width) {
   ctx.fillStyle = color;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(p, p, width * cw + p, height*cw +p);
 }
 
 function changeBackground() {
   var newColour  = document.getElementById("background-color").value;
   backgroundColor = newColour;
 
-  changeCanvasBackground(canvasBottom, ctxBottom, backgroundColor);
-  changeCanvasBackground(canvas3, ctx3, backgroundColor);
+  changeCanvasBackground(ctxBottom, backgroundColor, smallCanvasHeight, smallCanvasWidth);
+  changeCanvasBackground(ctx3, backgroundColor, mainCanvasHeight, mainCanvasWidth);
   drawBoard(smallCanvasWidth, smallCanvasHeight, cw, ctxBottom);
   drawBoard(mainCanvasWidth, mainCanvasHeight, cw, ctx3);
   redrawRects(ctx3, filledRectsCanvas3);
@@ -242,21 +261,31 @@ function redrawRects(ctx, filledRects) {
     ctx.fillStyle = color;
     ctx.fillRect(x_+1, y_+1, cw-1, cw-1);
   };
+  for (const x of deductions) {
+    if (findDeduction) {
+    coords = x.split(',');   
+    cx_ = Number(coords[0]);
+    cy_ = Number(coords[1]);
+    ctx3.font = cw +"px Arial";
+    ctx3.fillStyle = "black";
+    ctx3.fillText("V", cx_ + 3 - cw, cy_ + 1 + cw);
+    }
+  }
 }
 
 function clearCanvas(canvas, ctx, filledRects) {
-  minY = 10000; maxY = 1; minX = 10000; maxX = 1;
   for (const x of filledRects) {
     coords = x.split(',');   
     y_ = Number(coords[0]);
     x_ = Number(coords[1]);
-    ctx.clearRect(x_+1, y_+1, cw-1, cw-1);
+    ctx.clearRect(x_+1, y_, cw-1, cw-1);
   }
 }
 
 function clearDraw() {
   clearCanvas(canvasBottom, ctxBottom, filledRectsCanvasBottom);
   clearCanvas(canvasTop, ctxTop, filledRectsCanvasTop);
+  minY = 10000; maxY = 1; minX = 10000; maxX = 1;
   filledRectsCanvasBottom = [];
   filledRectsCanvasTop = [];
 }
@@ -275,6 +304,7 @@ function undoDraw() {
   ctxTop.fillRect(x_+1, y_+1, cw-1, cw-1)
 
   filledRectsCanvasBottom.pop()
+  filledRectsCanvasTop.pop()
 }
 
 function undoMain() {
@@ -356,6 +386,7 @@ canvasTop.addEventListener('click', function(e) {
 
 // listener for dragend
 canvasTop.addEventListener('dragend', function(e) {
+
   drawFigToCanvas(canvas3, e, cw, ctx3, filledRectsCanvasTop)
 })
 
@@ -381,18 +412,23 @@ canvas3.addEventListener('click', function(e) {
     const cy_ = cy - 2
     const cx_ = cx + 2;
     var new_coords = [cx, cy].toString();
-    const find = deductions.includes(new_coords);
-
-    if (!find) {
+    const findDeduction = deductions.includes(new_coords);
+    console.log(new_coords, deductions, findDeduction)
+    if (!findDeduction) {
       ctx3.font = cw +"px Arial";
-
-      ctx3.fillText("V", cx_ + 1, cy_ + 1 + cw);
+      ctx3.globalAlpha = 1.0;
+      ctx3.fillStyle = "black";
+      ctx3.fillText("V", cx_ + 1 - cw, cy_ + 1+ cw);
       deductions.push(new_coords);
+      // ctx3.globalAlpha = 0.2;
+      // ctx3.fillStyle = "grey";
+      // ctx3.fillRect(0,0,mainCanvasWidth*cw, cy_)
+      // ctx3.globalAlpha = 1.0;
     }
     else {
       ctx3.clearRect(cx+1, cy+1, cw -1, cw-1);
       const ix = deductions.indexOf(new_coords);
-      deductions.splice(ix, 1)
+      deductions.splice(ix, 1);
     }
     drawBoard(mainCanvasWidth, mainCanvasHeight, cw, ctx3);
     redrawRects(ctx3, filledRectsCanvas3);
