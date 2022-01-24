@@ -2,8 +2,15 @@ let filledRectsCanvasTop = [];
 let filledRectsCanvasBottom = [];
 let filledRectsCanvas2 = [];
 let filledRectsCanvas3 = [];
+// let filledRectsCanvas3 = ['392,2,#00ff00', '377,17,#00ff00', '392,32,#00ff00', '377,47,#00ff00', '392,62,#00ff00', '377,77,#00ff00', '392,92,#00ff00', '377,122,#00ff00', '392,137,#00ff00', '377,152,#00ff00', '392,167,#00ff00', '377,182,#00ff00', '392,197,#00ff00', '377,212,#00ff00', '392,227,#00ff00', '377,242,#00ff00', '392,257,#00ff00', '377,272,#00ff00', '392,287,#00ff00', '377,302,#00ff00', '392,317,#00ff00', '377,332,#00ff00', '392,347,#00ff00', '377,362,#00ff00', '392,377,#00ff00', '377,392,#00ff00', '392,407,#00ff00', '377,437,#00ff00', '392,452,#00ff00', '377,467,#00ff00', '392,482,#00ff00', '377,497,#00ff00', '392,512,#00ff00', '377,527,#00ff00']
+let filledRectsCanvas3NoDeductions = [];
 let mainPatternSizes = [];
-let deductions = ['107,302', '437,302'];
+// let deductions = ['482,422', '482,107', '197,392', '197,137'];
+let deductions = []
+let currentWindowIndex = 1;
+let windowTop = 0;
+
+
 let mouseToDragY = 1;
 let mouseDown = false;
 let minY = 10000;
@@ -21,7 +28,10 @@ let drawingCanvasWidth = 4;
 let selectingColor = false;
 let findDeduction = false;
 let addingDeduction = false;
+let focus = false;
 let deductionYs = [];
+
+
 // get canvas to fit div
 function resizeCanvas(div, canvas){
 
@@ -59,31 +69,43 @@ var cw = 15;
 let backgroundColor = document.getElementById("background-color").value
 let drawingColor = document.getElementById("drawing-color").value
 
-function drawBoard(gridWidth, gridHeight, cellWidth, ctx){
+function drawBoard(gridWidth, gridHeight, cellWidth, ctx, Ytop, Ybottom, nrDeductions){
   // draws all the boards
   ctx.beginPath();
+  var top = Ytop - p || 0;
+  if (top < 0) {top = 0}
+  var gridHeight = Math.round((Ybottom  - Ytop) / 15)  || gridHeight
+  var xStart = (nrDeductions * cw) / 2 + p || 0.5 + p;
+  var gridWidth  = gridWidth - nrDeductions || gridWidth
+  // console.log(xStart, gridWidth)
+  // vertical 
   for (var x = 0; x <= cellWidth * gridWidth; x += cellWidth) {
-      ctx.moveTo(0.5 + x + p, p);
-      ctx.lineTo(0.5 + x + p, 15 * gridHeight + p);
-  } 
+      ctx.moveTo(xStart + x, top+p);
+      ctx.lineTo(xStart + x, cw * gridHeight + top+p);
+  }
+
+  // horizontal
 
   for (var x = 0; x <= cellWidth * gridHeight; x += cellWidth) {
-      ctx.moveTo(p, 0.5 + x + p);
-      ctx.lineTo(15 * gridWidth + p, 0.5 + x + p);
+      ctx.moveTo(xStart, 0.5 + x + p + top);
+      ctx.lineTo(cw * gridWidth + xStart, 0.5 + x +top + p);
   }
   ctx.strokeStyle = "black";
   ctx.stroke();
-  ctx.fillStyle = "black";
-  for (var x = 0  ; x <= cellWidth * gridWidth - (1 * cellWidth); x += cellWidth) {
-    ctx.font = 10 +"px Arial";
-    ctx.fillText(x /cw + 1, x + (cw / 3), gridHeight*cw + cw);
-  }
+  if (typeof Ytop == 'undefined') {
+  // if (!Ytop) {
+    
+    ctx.fillStyle = "black";
+    for (var x = 0  ; x <= cellWidth * gridWidth - (1 * cellWidth); x += cellWidth) {
+      ctx.font = 10 +"px Arial";
+      ctx.fillText(x /cw + 1, x + (cw / 3), gridHeight*cw + cw);
+    }
 
-  for (var y = 0  ; y <= cellWidth * gridHeight - (1 * cellWidth); y += cellWidth) {
-    ctx.font = 10 +"px Arial";
-    ctx.fillText( gridHeight - (y /cw + 1) + 1, gridWidth*cw + cw / 3, y + cw);
+    for (var y = 0  ; y <= cellWidth * gridHeight - (1 * cellWidth); y += cellWidth) {
+      ctx.font = 10 +"px Arial";
+      ctx.fillText( gridHeight - (y /cw + 1) + 1, gridWidth*cw + cw / 3, y + cw);
+    }
   }
-
 }
 
 function clickDrawToCanvas(canvas, event, cw, ctx, filledRects) {
@@ -136,7 +158,7 @@ function reDrawMainCanvas() {
 
   // set background
   ctx3.fillStyle = backgroundColor;
-  ctx3.fillRect(p, p, canvas3.width * cw + p, canvas3.height*cw +p);
+  ctx3.fillRect(p, p, mainCanvasWidth * cw + p, mainCanvasHeight*cw +p);
   
   // draw lines
   drawBoard(mainCanvasWidth, mainCanvasHeight, cw, ctx3);
@@ -144,18 +166,17 @@ function reDrawMainCanvas() {
   // deductions
   for (const x of deductions) {
     coords = x.split(',');   
-    cx_ = Number(coords[0]);
-    cy_ = Number(coords[1]);
+    cy_ = Number(coords[0]);
+    cx_ = Number(coords[1]);
     ctx3.font = cw +"px Arial";
     ctx3.fillStyle = "black";
     ctx3.fillText("V", cx_ + 3 - cw, cy_ + 1 + cw);
   }
 
   // empty pixels after deductions
-  console.log("deds",deductions)
   for (const ded of deductions) {
     coords = ded.split(',');
-    deductionX = Number(coords[0]); deductionY = Number(coords[1]);
+    deductionY = Number(coords[0]); deductionX = Number(coords[1]);
     ctx3.clearRect(deductionX+1, 0, cw-1, deductionY+cw)
     }
   // fill rects
@@ -167,7 +188,69 @@ function reDrawMainCanvas() {
     ctx3.fillStyle = color;
     ctx3.fillRect(x_+1, y_+1, cw-1, cw-1);
   };
+  
+  // make window
+  deductionsReverse = deductions.sort().reverse();
+  
+  let previousY = mainCanvasHeight * cw;
+  let bottomY = previousY
+  let deductionIndex = -1
+  let nrDeductions = 0;
+  for (var ix = 0  ; ix <= deductionsReverse.length - 1; ix ++)  {
+    
+    dedCoords = deductionsReverse[ix].split(',');
+    y = Number(dedCoords[0]);
+    x = Number(dedCoords[1]);
+    if (y < previousY) {
+      deductionIndex += 1
+    }
+    if (deductionIndex == currentWindowIndex) {
+      topY = y;
+      if (deductionIndex != 0) {
+        dedCoordsPrevious = deductionsReverse[ix - 1].split(',');
+        bottomY = Number(dedCoordsPrevious[0]);
+      }
+      break
+    };
+    previousY = y;
+    nrDeductions += 1;
+  };
+  
+  if (currentWindowIndex > deductionIndex && deductions.length > 0) {
+    bottomY = y;
+    topY = 0;
+  };
+  
+  if (deductions.length > 0){
+    ctx3.fillStyle = "grey";
+    ctx3.globalAlpha = 0.3;
+    ctx3.fillRect(p, p, mainCanvasWidth*cw, topY-p);
+    ctx3.fillRect(p, bottomY, mainCanvasWidth*cw, mainCanvasHeight * cw-bottomY + p);
+    ctx3.globalAlpha = 1.0;
+  }
+  
+  //focus
+  if (focus) {
+    ctx3.clearRect(0,topY, mainCanvasWidth * cw+p, bottomY - topY);
+    drawBoard(mainCanvasWidth, mainCanvasHeight, cw, ctx3, topY, bottomY, nrDeductions);
+    
+    let startX = 0;
+    let padCount = 0;
+    let tempFilled = [];
+    console.log(filledRectsCanvas3NoDeductions.length)
+    console.log(filledRectsCanvas3.length)
+    for (const coords of filledRectsCanvas3NoDeductions) {
+      coordsArr = coords.split(',')
+      x = Number(coordsArr[1]); y = Number(coordsArr[0]); color = coordsArr[2];
+      x = x + (nrDeductions / 2) * cw;
 
+      if (y < bottomY && y > topY ) {
+        ctx3.fillStyle = color
+        ctx3.fillRect(x +1, y+1 , cw - 2, cw - 1)
+        console.log('drawing') 
+      }
+  }
+  }
 }
 
 function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
@@ -189,25 +272,31 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
         coords = x.split(',');
         y_ = coords[0] - minY + mouseY - (mouseToDragY - minY);
         x_ = (coords[1] - minX + p) + i * shapeSize * cw;
+        color = coords[2];
         
+        new_coordsMainNoDed = [y_, x_,color].toString();
+        
+        // }
         // make sure to jump over deductions
         for (const coordString of deductions) {
           coordsDeduction = coordString.split(',');
-          coordsDedX = coordsDeduction[0]; coordsDedY = coordsDeduction[1];
+          coordsDedX = Number(coordsDeduction[1]); coordsDedY = Number(coordsDeduction[0]);
+
           if (x_ + addOn == coordsDedX && y_ < coordsDedY) {
             addOn += cw;
+
           }
         }
         x_ += addOn;
         // 
-        color = coords[2];
+        
          // dont draw outside canvas
         if (x_+1 < mainCanvasWidth * cw && y_ < mainCanvasHeight * cw) {
-          new_coordsMain = [y_, x_,color].toString()
+          new_coordsMain = [y_, x_,color].toString();
           filledRectsCanvas3.push(new_coordsMain);
           patternSize += 1;
-          // ctx.fillStyle = color;
-          // ctx.fillRect(x_+1, y_+1, cw-1, cw-1);
+          filledRectsCanvas3NoDeductions.push(new_coordsMainNoDed);
+
         }
       }
     }
@@ -228,9 +317,8 @@ function changeBackground() {
   backgroundColor = newColour;
 
   changeCanvasBackground(ctxBottom, backgroundColor, smallCanvasHeight, smallCanvasWidth);
-  changeCanvasBackground(ctx3, backgroundColor, mainCanvasHeight, mainCanvasWidth);
-  drawBoard(smallCanvasWidth, smallCanvasHeight, cw, ctxBottom);
   reDrawMainCanvas();
+  drawBoard(drawingCanvasWidth, drawingCanvasHeight, cw, ctxBottom);
 }
 
 function changeDrawingColor() {
@@ -246,18 +334,11 @@ function removeOptions(selectElement) {
 }
 
 function changeMainCanvasSizes() {
-  var mainDims = document.getElementById("mainDims").value;
-  var mainDimsArr = mainDims.split('x');
-  var mainCanvasWidth = Number(mainDimsArr[0]);
-  
-  // update main canvas size
-  ctx3.clearRect(0, 0, canvas3.width, canvas3.height);
-  drawBoard(mainCanvasWidth, mainCanvasHeight, cw, ctx3);
-
-  // update selection for small canvas size
+  var mainX = document.getElementById("mainX").value;
+  var mainCanvasWidth = Number(mainX);
   var smallCanvasSelect = document.getElementById('drawingDims');
   removeOptions(smallCanvasSelect);
-  for (var x = mainCanvasWidth; x >= 2; x -= 1){
+  for (var x = mainCanvasWidth / 2; x >= 2; x -= 1){
     if (mainCanvasWidth % x == 0) {
       var opt = document.createElement('option');
       opt.value = x;
@@ -265,6 +346,7 @@ function changeMainCanvasSizes() {
       smallCanvasSelect.appendChild(opt);
     }
   }
+  changeDrawingCanvasSizes();
   }
 
 function changeDrawingCanvasSizes() {
@@ -281,15 +363,17 @@ function changeDrawingCanvasSizes() {
 }
 
 function clearCanvas(canvas, ctx, filledRects) {
+  // console.log(filledRects)
   for (const x of filledRects) {
     coords = x.split(',');   
     y_ = Number(coords[0]);
     x_ = Number(coords[1]);
-    ctx.clearRect(x_+1, y_, cw-1, cw-1);
+    ctx.clearRect(x_+1, y_+1, cw-1, cw-1);
   }
 }
 
 function clearDraw() {
+  
   clearCanvas(canvasBottom, ctxBottom, filledRectsCanvasBottom);
   clearCanvas(canvasTop, ctxTop, filledRectsCanvasTop);
   minY = 10000; maxY = 1; minX = 10000; maxX = 1;
@@ -298,20 +382,22 @@ function clearDraw() {
 }
 
 function undoDraw() {
-  lastPixel = filledRectsCanvasBottom[filledRectsCanvasBottom.length - 1];
+  let lastPixel = filledRectsCanvasBottom[filledRectsCanvasBottom.length - 1];
+  // console.log(lastPixel)
+  if (lastPixel) {
+    coords = lastPixel.split(',')
+    y_ = Number(coords[0]);
+    x_ = Number(coords[1]);
+    
+    ctxBottom.fillStyl = backgroundColor;
+    ctxTop.fillStyle = backgroundColor;
 
-  coords = lastPixel.split(',')
-  y_ = Number(coords[0]);
-  x_ = Number(coords[1]);
-  
-  ctxBottom.fillStyl = backgroundColor;
-  ctxTop.fillStyle = backgroundColor;
+    ctxBottom.fillRect(x_+1, y_+1, cw-1, cw-1)
+    ctxTop.fillRect(x_+1, y_+1, cw-1, cw-1)
 
-  ctxBottom.fillRect(x_+1, y_+1, cw-1, cw-1)
-  ctxTop.fillRect(x_+1, y_+1, cw-1, cw-1)
-
-  filledRectsCanvasBottom.pop()
-  filledRectsCanvasTop.pop()
+    filledRectsCanvasBottom.pop()
+    filledRectsCanvasTop.pop()
+  }
 }
 
 function undoMain() {
@@ -338,7 +424,7 @@ function rgbToHex(r, g, b) {
 function changeMainX() {
   mainX = document.getElementById("mainX").value;
   mainCanvasWidth = mainX;
-
+  changeMainCanvasSizes();
   reDrawMainCanvas()
 }
 
@@ -355,6 +441,11 @@ function changeSmallY() {
   ctxTop.clearRect(0, 0, canvasTop.width, canvasTop.height);
   drawBoard(smallCanvasWidth, smallCanvasHeight, cw, ctxBottom);
   drawBoard(smallCanvasWidth, smallCanvasHeight, cw, ctxTop);
+}
+
+function focusOn(){
+  focus = !focus;
+  reDrawMainCanvas()
 }
 
 // listener for dragging
@@ -395,6 +486,8 @@ canvas3.addEventListener('click', function(e) {
     var pixelData = ctx3.getImageData(x, y, 1, 1).data; 
     var hex = "#" + ("000000" + rgbToHex(pixelData[0], pixelData[1], pixelData[2])).slice(-6);
     drawingColor = hex;
+    document.getElementById("drawing-color").value = drawingColor;
+
   }
 
   else if (addingDeduction){
@@ -404,7 +497,7 @@ canvas3.addEventListener('click', function(e) {
     const y = e.clientY - rect.top;
     const cy = (y - (y%cw)) + p;
     const cx = (x - (x%cw)) + p ;
-    var new_coords = [cx, cy].toString();
+    var new_coords = [cy, cx].toString();
     const findDeduction = deductions.includes(new_coords);
     
 
@@ -420,6 +513,49 @@ canvas3.addEventListener('click', function(e) {
 
     reDrawMainCanvas();
   }
+  else {
+    const rect = canvas3.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    let previousY = mainCanvasHeight * cw;
+    deductionsReverse = deductions.sort().reverse();
+    let deductionIndex = -1
+    for (var ix = 0  ; ix <= deductionsReverse.length - 1; ix ++)  {
+            
+      dedCoords = deductionsReverse[ix].split(',');
+      y_ = Number(dedCoords[0]);
+      x_ = Number(dedCoords[1]);
+      if (y_ < previousY) {
+        deductionIndex += 1;
+  
+      }
+
+      
+      if (ix != deductionsReverse.length - 1) {
+        topY = y_;
+        if (deductionIndex != 0) {
+          previousY = Number(deductionsReverse[ix - 1].split(',')[0]);
+        };
+        if (y_ != previousY) {
+          bottomY = previousY;
+          
+        }
+       
+      }
+      else {
+        topY = p;
+        bottomY = y_
+        deductionIndex += 1;
+      }
+      if (y < bottomY && y >topY) {
+        currentWindowIndex = deductionIndex
+      }
+      previousY = y_;
+    }
+    // console.log(y, y_, y_next, deductionIndex, currentWindowIndex);
+  }
+  reDrawMainCanvas()
 }
 )
 
