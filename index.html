@@ -9,39 +9,7 @@
 </head>
 <body>
     <h1>Villapaidan Suunittelija</h1>
-    <div class="options "> 
-    </div>
-    <!-- <div id="selectDiv1">
-        <label for="mainDims"> Choose size for main canvas</label>
-        <select name="mainDims" id="mainDims" onchange="changeMainCanvasSizes()" > 
-            <option value="36">36</option>
-            <option value="32">32</option>
-            <option value="10">10</option>
-        </select>
-    </div> -->
-    <div>
-        <form>
-            <label for="mainX">Paakuvion silmukka maara</label><br>
-            <input type="number" id="mainX" name="mainX" value="36" onchange="changeMainX()"><br>
-            <label for="mainY">Paakuvion rivi maara</label><br>
-            <input type="number" id="mainY" name="mainY" value="42" onchange="changeMainY()"><br>
-            <label for="smallY">Pienen kuvion rivi maara</label><br>
-            <input type="number" id="smallY" name="smallY" value="18" onchange="changeSmallY()">
-          </form> 
-    </div>
-    <div id="selectDiv2">
-        <label for="drawingDims"> Choose size for drawing canvas</label>
-        <select name="drawingDims" id="drawingDims" onchange="changeDrawingCanvasSizes()">
-            <option value="18" >18</option>
-            <option value="12">12</option>
-            <option value="9">9</option>
-            <option value="6">6</option>
-            <option value="4" selected="selected">4</option>
-            <option value="3">3</option>
-            <option value="2">2</option>
-        </select>
-    </div>
-    <div>
+    <!-- <div>
         <input type="color" id="background-color" onchange="changeBackground()" 
         name="background-color" value="#FFFFFF">
         <label for="background-color">Taustavari</label>
@@ -51,13 +19,63 @@
         name="drawing-color" value="#00FF00">
         <label for="drawing-color">Piirustusvari</label>
     </div>
-    <button id="undoDrawing" onclick="undoDraw()">takaisin pieni</button>
-    <button id="undoMain" onclick="undoMain()">takaisin suuri</button>
-    <button id="clearDraw" onclick="clearDraw()">clear pieni</button>
-    <button id="selectColor" onclick="selectColorFromCanvas()">valitse vari kuviosta</button>
-    <button id="deduction" onclick="deducationBool()">vahennys</button>
-    <button id="focus" onclick="focusOn()">focus</button>
+    <button id="selectColor" onclick="selectColorFromCanvas()">valitse vari kuviosta</button> -->
     <div class="wrapper" id ="canvasWrapper">
+        <div id=generalOptions>
+            <div>
+                <input type="color" id="background-color" onchange="changeBackground()" 
+                name="background-color" value="#FFFFFF">
+                <label for="background-color">Taustavari</label>
+            </div>
+            <div>
+                <input type="color" id="drawing-color" onchange="changeDrawingColor()" 
+                name="drawing-color" value="#00FF00">
+                <label for="drawing-color">Piirustusvari</label>
+            </div>
+            <button id="selectColor" onclick="selectColorFromCanvas()">valitse vari kuviosta</button>
+        </div>
+        <div id=div1Options class=div1Options>
+            <div>
+                <form>
+                    <label for="smallY">Pienen kuvion rivi maara</label><br>
+                    <input type="number" id="smallY" name="smallY" value="18" onchange="changeSmallY()">
+                  </form> 
+            </div>
+            <div>
+                <label for="drawingDims"> Choose size for drawing canvas</label>
+                <select name="drawingDims" id="drawingDims" onchange="changeDrawingCanvasSizes()">
+                    <option value="18" >18</option>
+                    <option value="12">12</option>
+                    <option value="9">9</option>
+                    <option value="6">6</option>
+                    <option value="4" selected="selected">4</option>
+                    <option value="3">3</option>
+                    <option value="2">2</option>
+                </select>
+            </div>
+            <div>
+                <button id="undoDrawing" onclick="undoDraw()">takaisin pieni</button>
+                <button id="clearDraw" onclick="clearDraw()">clear pieni</button>
+            </div>
+        </div>
+        <div id=div3Options class="div3Options">
+            <div>
+                <div>
+                    <form>
+                        <label for="mainX">Paakuvion silmukka maara</label><br>
+                        <input type="number" id="mainX" name="mainX" value="36" onchange="changeMainX()"><br>
+                        <label for="mainY">Paakuvion rivi maara</label><br>
+                        <input type="number" id="mainY" name="mainY" value="42" onchange="changeMainY()"><br>
+                      </form> 
+                </div>
+            </div>
+            <div>
+                <button id="undoMain" onclick="undoMain()">takaisin suuri</button>
+                <button id="deduction" onclick="deducationBool()">vahennys</button>
+                <button id="focus" onclick="focusOn()">focus</button>
+                <button id="drawOnMain" onclick="drawOnMainOn()">draw main</button>
+            </div>
+        </div>
         <div id="div1" class="template1">
             <canvas id="canvasBottom" class="bottomCanvas"></canvas>
             <canvas id="canvasTop" class="topCanvas" draggable="true"></canvas>
