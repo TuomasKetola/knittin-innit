@@ -8,31 +8,23 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Villapaidan Suunittelija</h1>
-    <!-- <div>
-        <input type="color" id="background-color" onchange="changeBackground()" 
-        name="background-color" value="#FFFFFF">
-        <label for="background-color">Taustavari</label>
-    </div>
-    <div>
-        <input type="color" id="drawing-color" onchange="changeDrawingColor()" 
-        name="drawing-color" value="#00FF00">
-        <label for="drawing-color">Piirustusvari</label>
-    </div>
-    <button id="selectColor" onclick="selectColorFromCanvas()">valitse vari kuviosta</button> -->
+    <h1>Villapaidan Karrokkeen Suunittelija</h1>
     <div class="wrapper" id ="canvasWrapper">
         <div id=generalOptions>
             <div>
+                <input type="color" id="add-color" onchange="addColor()" 
+                name="add-color" value="#FFFFFF">
+                <label for="background-color">Lisaa Vari</label>
                 <input type="color" id="background-color" onchange="changeBackground()" 
                 name="background-color" value="#FFFFFF">
                 <label for="background-color">Taustavari</label>
             </div>
             <div>
-                <input type="color" id="drawing-color" onchange="changeDrawingColor()" 
-                name="drawing-color" value="#00FF00">
-                <label for="drawing-color">Piirustusvari</label>
+                drawing colors
+                <div id="drawing-color-divs" class="float-container">
+                    <input type="color" id="hidden-color-change" tabindex=-1 class="hidden" onchange="changeChosenColor()">
+                </div>
             </div>
-            <button id="selectColor" onclick="selectColorFromCanvas()">valitse vari kuviosta</button>
         </div>
         <div id=div1Options class=div1Options>
             <div>

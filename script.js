@@ -10,6 +10,8 @@ let deductions = []
 let currentWindowIndex = 0;
 let windowTop = 0;
 
+let currentColorId = 0;
+let currentColorDivId = undefined;
 
 let mouseToDragY = 1;
 let mouseDown = false;
@@ -17,6 +19,9 @@ let minY = 10000;
 let maxY = 1;
 let minX = 10000;
 let maxX = 1;
+
+let currentWindowTop = 0;
+let currentWindowBotttom = 1000;
 
 let mainCanvasWidth = 36;
 let mainCanvasHeight = 42;
@@ -32,6 +37,7 @@ let focus = false;
 let drawMain = false;
 let deductionYs = [];
 
+let isChecked = false;
 
 // get canvas to fit div
 function resizeCanvas(div, canvas){
@@ -65,7 +71,7 @@ var cw = 15;
 
 // get colours
 let backgroundColor = document.getElementById("background-color").value
-let drawingColor = document.getElementById("drawing-color").value
+let drawingColor = "black"
 
 function drawBoard(gridWidth, gridHeight, cellWidth, ctx, Ytop, Ybottom, nrDeductions){
   // draws all the boards
@@ -158,16 +164,6 @@ function reDrawMainCanvas() {
   // draw lines
   drawBoard(mainCanvasWidth, mainCanvasHeight, cw, ctx3);
   
-  // deductions
-  for (const x of deductions) {
-    coords = x.split(',');   
-    cy_ = Number(coords[0]);
-    cx_ = Number(coords[1]);
-    ctx3.font = cw +"px Arial";
-    ctx3.fillStyle = "black";
-    ctx3.fillText("V", cx_ + 3 - cw, cy_ + 1 + cw);
-  }
-
   // empty pixels after deductions
   for (const ded of deductions) {
     coords = ded.split(',');
@@ -218,11 +214,22 @@ function reDrawMainCanvas() {
   
   // do window shading
   if (deductions.length > 0){
+    updateWindowTopBottom();
     ctx3.fillStyle = "grey";
     ctx3.globalAlpha = 0.4;
     ctx3.fillRect(p, p, mainCanvasWidth*cw, topY-p);
     ctx3.fillRect(p, bottomY, mainCanvasWidth*cw, mainCanvasHeight * cw-bottomY + p);
     ctx3.globalAlpha = 1.0;
+  }
+
+  // deductions
+  for (const x of deductions) {
+    coords = x.split(',');   
+    cy_ = Number(coords[0]);
+    cx_ = Number(coords[1]);
+    ctx3.font = cw +"px Arial";
+    ctx3.fillStyle = "black";
+    ctx3.fillText("V", cx_ + 3 - cw, cy_ + cw - 1);
   }
   
   //focus window
@@ -262,7 +269,6 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
     return xp == yp ? 0 : xp < yp ? -1 : 1;
   });
 
-  
   if (mouseX > 0) { // make sure on the right canvas
     for(let i = 0; i <= nrReps - 1; i++) {
       
@@ -286,7 +292,8 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
         }
         x_ += addOn;
          // dont draw outside canvas
-        if (x_+1 < mainCanvasWidth * cw && y_ < mainCanvasHeight * cw) {
+        if (x_+1 < mainCanvasWidth * cw 
+          && y_ < currentWindowBotttom && y_ > currentWindowTop - cw) {
           new_coordsMain = [y_, x_,color].toString();
           filledRectsCanvas3.push(new_coordsMain);
           patternSize += 1;
@@ -410,11 +417,33 @@ function undoMain() {
 function selectColorFromCanvas() {
   // button boolean
   selectingColor = !selectingColor;
+  if (selectingColor){
+    turnButtonOn("selectColor");
+    for (const but of ["deduction", "drawOnMain", "focus"]){
+      turnButtonOff(but);
+      if (focus){focus=false};
+      if (drawMain){drawMain=false};
+      if (deduction){deduction=false}
+    }
+  }
+  else {turnButtonOff("selectColor")}
+  reDrawMainCanvas();
 }
 
 function deducationBool() {
   // button boolean
   addingDeduction = !addingDeduction;
+  if (addingDeduction) {
+    turnButtonOn("deduction");
+    for (const but of ["selectColor", "drawOnMain", "focus"]){
+      turnButtonOff(but);
+      if (focus){focus=false};
+      if (drawMain){drawMain=false};
+      if (selectingColor){selectingColor=false}
+    }
+  }
+  else {turnButtonOff("deduction")};
+  reDrawMainCanvas();
 }
 
 function rgbToHex(r, g, b) {
@@ -448,15 +477,46 @@ function changeSmallY() {
   drawBoard(smallCanvasWidth, smallCanvasHeight, cw, ctxTop);
 }
 
+function turnButtonOn(buttonId, color){
+  var property = document.getElementById(buttonId);
+  property.style.backgroundColor = color || "green"
+}
+
+function turnButtonOff(buttonId){
+  var property = document.getElementById(buttonId);
+  property.style.backgroundColor = "white"
+}
+
 function focusOn(){
   // focus button / boolean
   focus = !focus;
+  if (focus){ 
+    turnButtonOn("focus");
+    for (const but of ["deduction", "drawOnMain", "selectColor"]){
+      turnButtonOff(but);
+      if (deduction){deduction=false};
+      if (drawMain){drawMain=false};
+      if (selectingColor){selectingColor=false}
+    }
+  }
+  else {turnButtonOff('focus')}
   reDrawMainCanvas();
 }
 
 function drawOnMainOn(){
   // drawing directly to main on
   drawMain = !drawMain;
+  if (drawMain){
+    turnButtonOn("drawOnMain", drawingColor);
+    for (const but of ["deduction", "focus", "selectColor"]){
+      turnButtonOff(but)
+    };
+    if (deduction){deduction=false};
+    if (focus){focus=false};
+    if (selectingColor){selectingColor=false}
+  }
+  else {turnButtonOff("drawOnMain")}
+  reDrawMainCanvas();
 }
 
 function nrDeducationsWindow(windowIx) {  
@@ -481,6 +541,46 @@ function nrDeducationsWindow(windowIx) {
     
   }
   return deductions.length
+}
+
+function updateWindowTopBottom(){
+  let deductionsSorted = deductions.sort().reverse();
+  let previousY__ = mainCanvasHeight * cw;
+  let curIndex = -1;
+  for (const ded of deductionsSorted){
+    coords = ded.split(','); y = Number(coords[0]); x = Number(coords[1]);
+    if (y<previousY__) {
+      curIndex += 1;
+    }
+    if (curIndex == currentWindowIndex) {
+      currentWindowBotttom = previousY__;
+      currentWindowTop = y;
+      break
+
+    }
+    previousY__ = y
+    currentWindowBotttom = y; 
+    currentWindowTop = 0;
+  };
+}
+
+// Add color
+function addColor() {
+  currentColorId += 1;
+  let newColor= document.getElementById("add-color").value;
+  newDiv = document.createElement("div");
+  newDiv.style.background = newColor;
+  newDiv.id = "color-"+String(currentColorId);
+  newDiv.className = "float-child";
+  document.getElementById("drawing-color-divs").appendChild(newDiv);
+}
+
+
+function changeChosenColor() {
+  let newColor = document.getElementById("hidden-color-change").value
+  let curDiv = document.getElementById(currentColorDivId)
+  curDiv.style.backgroundColor = newColor;
+  drawingColor = newColor
 }
 
 // listener for dragging
@@ -578,6 +678,8 @@ canvas3.addEventListener('click', function(e) {
 
   // click to change windows
   else {
+    // isChecked=document.getElementById("switchValue").checked;
+
     const rect = canvas3.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -593,11 +695,8 @@ canvas3.addEventListener('click', function(e) {
       y_ = Number(dedCoords[0]);
       x_ = Number(dedCoords[1]);
       if (y_ < previousY) {
-        deductionIndex += 1;
-  
-      }
-
-      
+        deductionIndex += 1; 
+      }   
       if (ix != deductionsReverse.length - 1) {
         topY = y_;
         if (deductionIndex != 0) {
@@ -607,7 +706,6 @@ canvas3.addEventListener('click', function(e) {
           bottomY = previousY;
           
         }
-       
       }
       else {
         topY = p;
@@ -626,7 +724,25 @@ canvas3.addEventListener('click', function(e) {
 )
 
 
+// colorSelect
+const colorSelectDiv = document.getElementById('drawing-color-divs')
+colorSelectDiv.addEventListener('click', function(e) {
+  if (e.target.style.backgroundColor) {
+    var rgb = e.target.style.backgroundColor.split("(")[1].split(")")[0].split(',');
+    var hex = "#" + ("000000" + rgbToHex(rgb[0], rgb[1], rgb[2])).slice(-6);
+    drawingColor  = hex;  
+  }
+})
 
+colorSelectDiv.addEventListener('dblclick', function(e) {
+  currentColorDivId = e.target.id;
+  if (currentColorDivId) {
+    let curDiv = document.getElementById(currentColorDivId)
+    document.getElementById("hidden-color-change").focus();
+    document.getElementById("hidden-color-change").value = "#FFCC00";
+    document.getElementById("hidden-color-change").click();
+  }
+})
 drawBoard(smallCanvasWidth, smallCanvasHeight, cw, ctxBottom);
 drawBoard(mainCanvasWidth, mainCanvasHeight, cw, ctx3)
 reDrawMainCanvas();
