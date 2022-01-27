@@ -5,8 +5,8 @@ let filledRectsCanvas3 = [];
 // let filledRectsCanvas3 = ['392,2,#00ff00', '377,17,#00ff00', '392,32,#00ff00', '377,47,#00ff00', '392,62,#00ff00', '377,77,#00ff00', '392,92,#00ff00', '377,122,#00ff00', '392,137,#00ff00', '377,152,#00ff00', '392,167,#00ff00', '377,182,#00ff00', '392,197,#00ff00', '377,212,#00ff00', '392,227,#00ff00', '377,242,#00ff00', '392,257,#00ff00', '377,272,#00ff00', '392,287,#00ff00', '377,302,#00ff00', '392,317,#00ff00', '377,332,#00ff00', '392,347,#00ff00', '377,362,#00ff00', '392,377,#00ff00', '377,392,#00ff00', '392,407,#00ff00', '377,437,#00ff00', '392,452,#00ff00', '377,467,#00ff00', '392,482,#00ff00', '377,497,#00ff00', '392,512,#00ff00', '377,527,#00ff00']
 let filledRectsCanvas3NoDeductions = [];
 let mainPatternSizes = [];
-// let deductions = ['482,422', '482,47', '197,392', '197,137'];
-let deductions = []
+let deductions = ['482,422', '482,47', '197,392', '197,137'];
+// let deductions = []
 let currentWindowIndex = 0;
 let windowTop = 0;
 
@@ -79,7 +79,7 @@ function drawBoard(gridWidth, gridHeight, cellWidth, ctx, Ytop, Ybottom, nrDeduc
   var top = Ytop - p || 0;
   if (top < 0) {top = 0}
   var gridHeight = Math.round((Ybottom  - Ytop) / 15)  || gridHeight
-  var xStart = (nrDeductions * cw) / 2 + p || 0.5 + p;
+  var xStart = (nrDeductions * cw) / 2 + p + 0.5 || 0.5 + p;
   var gridWidth  = gridWidth - nrDeductions || gridWidth
 
   // vertical 
@@ -99,7 +99,7 @@ function drawBoard(gridWidth, gridHeight, cellWidth, ctx, Ytop, Ybottom, nrDeduc
     ctx.fillStyle = "black";
     for (var x = 0  ; x <= cellWidth * gridWidth - (1 * cellWidth); x += cellWidth) {
       ctx.font = 10 +"px Arial";
-      ctx.fillText(x /cw + 1, x + (cw / 3), gridHeight*cw + cw);
+      ctx.fillText(x /cw + 2, x + (cw / 3), gridHeight*cw + cw);
     }
 
     for (var y = 0  ; y <= cellWidth * gridHeight - (1 * cellWidth); y += cellWidth) {
@@ -235,6 +235,8 @@ function reDrawMainCanvas() {
   //focus window
   if (focus) {
     ctx3.clearRect(0,topY, mainCanvasWidth * cw+p, bottomY - topY);
+    ctx3.fillStyle = backgroundColor;
+    ctx3.fillRect(p, topY, mainCanvasWidth * cw + p, bottomY - topY);
     drawBoard(mainCanvasWidth, mainCanvasHeight, cw, ctx3, topY, bottomY, nrDeductions);
     
     for (const coords of filledRectsCanvas3NoDeductions) {
@@ -244,7 +246,7 @@ function reDrawMainCanvas() {
 
       if (y < bottomY && y > topY ) {
         ctx3.fillStyle = color
-        ctx3.fillRect(x +1, y+1 , cw - 2, cw - 1)
+        ctx3.fillRect(x +1, y+1 , cw - 1, cw - 1)
     
       }
   }
@@ -258,8 +260,9 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
   const y = event.clientY - rect.top;
   const mouseY = (y - (y%cw)) + p;
   const mouseX = (x - (x%cw)) + p;
-  const shapeSize = (maxX - minX + cw) / cw;
-  const nrReps = mainCanvasWidth / shapeSize;
+  var shapeSize = (maxX - minX + cw) / cw;
+  const shapeSizeConst = (maxX - minX + cw) / cw;
+  
   
   var patternSize = 0;
   let addOn = 0;
@@ -268,7 +271,20 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
     var yp = Number(y.substring(0, y.indexOf(',')));
     return xp == yp ? 0 : xp < yp ? -1 : 1;
   });
-
+  
+  // make sure that if there are empty cells in the drawing board horizontally they show up when dragging
+  if (shapeSize < drawingCanvasWidth) {
+    for (let nrFiller=0; nrFiller<drawingCanvasWidth - shapeSizeConst; nrFiller++){
+      coords = sortedFilledRects[sortedFilledRects.length -1];
+      coords = coords.split(',');
+      y_ = coords[1] - minY + mouseY - (mouseToDragY - minY);
+      x_ = (coords[0] - minX + p);
+      console.log([x_+cw, y_, backgroundColor].toString());
+      sortedFilledRects.push([x_+cw, y_, backgroundColor].toString());
+      shapeSize += 1;
+    }
+  }
+  const nrReps = mainCanvasWidth / shapeSize;
   if (mouseX > 0) { // make sure on the right canvas
     for(let i = 0; i <= nrReps - 1; i++) {
       
@@ -372,8 +388,8 @@ function clearCanvas(canvas, ctx, filledRects) {
   // clear the rects of a canvas
   for (const x of filledRects) {
     coords = x.split(',');   
-    y_ = Number(coords[0]);
-    x_ = Number(coords[1]);
+    y_ = Number(coords[1]);
+    x_ = Number(coords[0]);
     ctx.clearRect(x_+1, y_+1, cw-1, cw-1);
   }
 }
@@ -392,12 +408,12 @@ function undoDraw() {
   let lastPixel = filledRectsCanvasBottom[filledRectsCanvasBottom.length - 1];
   if (lastPixel) {
     coords = lastPixel.split(',')
-    y_ = Number(coords[0]);
-    x_ = Number(coords[1]);
+    y_ = Number(coords[1]);
+    x_ = Number(coords[0]);
     
-    ctxBottom.fillStyl = backgroundColor;
+    ctxBottom.fillStyle = backgroundColor;
     ctxTop.fillStyle = backgroundColor;
-
+    
     ctxBottom.fillRect(x_+1, y_+1, cw-1, cw-1)
     ctxTop.fillRect(x_+1, y_+1, cw-1, cw-1)
 
@@ -410,36 +426,37 @@ function undoMain() {
   // button function to undo main
   lastSize = mainPatternSizes[mainPatternSizes.length - 1];
   filledRectsCanvas3.splice(filledRectsCanvas3.length - lastSize);
+  filledRectsCanvas3NoDeductions.splice(filledRectsCanvas3NoDeductions.length - lastSize);
   mainPatternSizes.pop();
   reDrawMainCanvas();
 }
 
-function selectColorFromCanvas() {
-  // button boolean
-  selectingColor = !selectingColor;
-  if (selectingColor){
-    turnButtonOn("selectColor");
-    for (const but of ["deduction", "drawOnMain", "focus"]){
-      turnButtonOff(but);
-      if (focus){focus=false};
-      if (drawMain){drawMain=false};
-      if (deduction){deduction=false}
-    }
-  }
-  else {turnButtonOff("selectColor")}
-  reDrawMainCanvas();
-}
+// function selectColorFromCanvas() {
+//   // button boolean
+//   selectingColor = !selectingColor;
+//   if (selectingColor){
+//     turnButtonOn("selectColor");
+//     for (const but of ["deduction", "drawOnMain", "focus"]){
+//       turnButtonOff(but);
+//       if (focus){focus=false};
+//       if (drawMain){drawMain=false};
+//       if (deduction){deduction=false}
+//     }
+//   }
+//   else {turnButtonOff("selectColor")}
+//   reDrawMainCanvas();
+// }
 
 function deducationBool() {
   // button boolean
   addingDeduction = !addingDeduction;
   if (addingDeduction) {
     turnButtonOn("deduction");
-    for (const but of ["selectColor", "drawOnMain", "focus"]){
+    for (const but of [ "drawOnMain", "focus"]){
       turnButtonOff(but);
       if (focus){focus=false};
       if (drawMain){drawMain=false};
-      if (selectingColor){selectingColor=false}
+      // if (selectingColor){selectingColor=false}
     }
   }
   else {turnButtonOff("deduction")};
@@ -483,6 +500,7 @@ function turnButtonOn(buttonId, color){
 }
 
 function turnButtonOff(buttonId){
+
   var property = document.getElementById(buttonId);
   property.style.backgroundColor = "white"
 }
@@ -492,12 +510,12 @@ function focusOn(){
   focus = !focus;
   if (focus){ 
     turnButtonOn("focus");
-    for (const but of ["deduction", "drawOnMain", "selectColor"]){
+    for (const but of ["deduction", "drawOnMain"]){
       turnButtonOff(but);
-      if (deduction){deduction=false};
-      if (drawMain){drawMain=false};
-      if (selectingColor){selectingColor=false}
     }
+    if (deduction){deduction=false};
+    if (drawMain){drawMain=false};
+    // if (selectingColor){selectingColor=false}
   }
   else {turnButtonOff('focus')}
   reDrawMainCanvas();
@@ -508,12 +526,12 @@ function drawOnMainOn(){
   drawMain = !drawMain;
   if (drawMain){
     turnButtonOn("drawOnMain", drawingColor);
-    for (const but of ["deduction", "focus", "selectColor"]){
+    for (const but of ["deduction", "focus"]){
       turnButtonOff(but)
     };
     if (deduction){deduction=false};
     if (focus){focus=false};
-    if (selectingColor){selectingColor=false}
+    // if (selectingColor){selectingColor=false}
   }
   else {turnButtonOff("drawOnMain")}
   reDrawMainCanvas();
@@ -573,14 +591,36 @@ function addColor() {
   newDiv.id = "color-"+String(currentColorId);
   newDiv.className = "float-child";
   document.getElementById("drawing-color-divs").appendChild(newDiv);
+  drawingColor = newColor;
 }
 
 
 function changeChosenColor() {
   let newColor = document.getElementById("hidden-color-change").value
   let curDiv = document.getElementById(currentColorDivId)
+  let oldColorRGB = curDiv.style.backgroundColor;
+  var rgb = oldColorRGB.split("(")[1].split(")")[0].split(',');
+  var oldColorHex = "#" + ("000000" + rgbToHex(rgb[0], rgb[1], rgb[2])).slice(-6);
+  
   curDiv.style.backgroundColor = newColor;
-  drawingColor = newColor
+  drawingColor = newColor;
+  for (x = 0; x <= filledRectsCanvas3.length - 1; x++) {
+    let coords = filledRectsCanvas3[x].split(',')
+    var rectColor = coords[2]; x_ = coords[1]; y_ = coords[0]
+    if (rectColor == oldColorHex) {
+      filledRectsCanvas3[x] = [y_, x_, newColor].toString();
+    }
+  };
+
+  for (x = 0; x <= filledRectsCanvas3NoDeductions.length - 1; x++) {
+    let coords = filledRectsCanvas3NoDeductions[x].split(',')
+    var rectColor = coords[2]; x_ = coords[1]; y_ = coords[0]
+    if (rectColor == oldColorHex) {
+      filledRectsCanvas3NoDeductions[x] = [y_, x_, newColor].toString()
+    }
+  }
+  reDrawMainCanvas()
+
 }
 
 // listener for dragging
@@ -687,8 +727,6 @@ canvas3.addEventListener('click', function(e) {
     let previousY = mainCanvasHeight * cw;
     deductionsReverse = deductions.sort().reverse();
     let deductionIndex = -1
-    let nrDeductions = nrDeducationsWindow(currentWindowIndex);
-    changeMainCanvasSizes(nrDeductions);
     for (var ix = 0  ; ix <= deductionsReverse.length - 1; ix ++)  {
             
       dedCoords = deductionsReverse[ix].split(',');
@@ -719,6 +757,8 @@ canvas3.addEventListener('click', function(e) {
     };
 
   };
+  let nrDeductions = nrDeducationsWindow(currentWindowIndex);
+  changeMainCanvasSizes(nrDeductions);
   reDrawMainCanvas()
 }
 )
@@ -730,7 +770,7 @@ colorSelectDiv.addEventListener('click', function(e) {
   if (e.target.style.backgroundColor) {
     var rgb = e.target.style.backgroundColor.split("(")[1].split(")")[0].split(',');
     var hex = "#" + ("000000" + rgbToHex(rgb[0], rgb[1], rgb[2])).slice(-6);
-    drawingColor  = hex;  
+    drawingColor = hex;
   }
 })
 
@@ -743,6 +783,44 @@ colorSelectDiv.addEventListener('dblclick', function(e) {
     document.getElementById("hidden-color-change").click();
   }
 })
+
+
+function download() {
+  var dt = canvas3.toDataURL('image/jpeg');
+  this.href = dt;
+};
+let downloadLnk  = document.getElementById('downloadLnk')
+downloadLnk.addEventListener('click', download, false);
+
+
+
+
 drawBoard(smallCanvasWidth, smallCanvasHeight, cw, ctxBottom);
 drawBoard(mainCanvasWidth, mainCanvasHeight, cw, ctx3)
 reDrawMainCanvas();
+// console.log(filledRectsCanvas3)
+// Get the modal
+var modal = document.getElementById("manualModal");
+
+// Get the button that opens the modal
+var btn = document.getElementById("manualButton");
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks on the button, open the modal
+btn.onclick = function() {
+  modal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+  modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+} 

@@ -9,8 +9,138 @@
 </head>
 <body>
     <h1>Villapaidan Karrokkeen Suunittelija</h1>
+    <!-- manual button -->
+    <button id="manualButton">Kaytto-Ohjeet</button>
+
+    <!-- manual modal -->
+    <div id="manualModal" class="modal">
+
+        <!-- Modal content -->
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <h1>Kaytto-Ohjeet</h1>
+          <div class="manual-parent">
+            <h2>Ennen piirtamisen aloitusta maarittele kuvion koko ja vahennykset</h2>
+            <div class="manual-child">
+                <div class="manual-text">
+                    Ensin paata paakuvion korkeus ja leveys:
+                </div>
+                <div class="videoDiv">
+                    <video autoplay="autoplay" loop="loop" width="200" height="200"> 
+                        <source src="videos/paa_rivi_silmukka.mp4" type="video/mp4" /> 
+                       </video> 
+                </div>
+            </div>
+            <div class="manual-child">
+                <div class="manual-text">
+                    Lisaa sitten Kavennukset
+                </div>
+                <div class="videoDiv">
+                    <video autoplay="autoplay" loop="loop" width="300" height="200"> 
+                        <source src="videos/vahennykset2.mp4" type="video/mp4" /> 
+                    </video> 
+                </div>
+                <div class="videoDiv">
+                    <video autoplay="autoplay" loop="loop" width="300" height="200"> 
+                        <source src="videos/vahennykset1.mp4" type="video/mp4" /> 
+                    </video> 
+                </div>
+    
+            </div>
+            <div class="manual-child">
+                <div class="manual-text">
+                    Seuraavaksi valitse paavari ja haluamasi kuvio-varit
+                </div>
+                <div class="videoDiv">
+                    <video autoplay="autoplay" loop="loop" width="300" height="200"> 
+                        <source src="videos/varit.mp4" type="video/mp4" /> 
+                    </video> 
+                </div>
+            </div>
+            <div class="manual-child">
+                <div class="manual-text">
+                    <p>Paakuvion rivin silmukka maara maarittelee minka kokoisia toistuvia kuviota voit kayttaa.
+                        Taman huomaan "pienen kuvion silmukka maara" valitsimesta paakuvion silmukka maaraa vaihtaessa.
+                        Ainoastaan silmukkamaarat jotka sallivat tasaisen toiston ovat sallittuja.
+                    </p>
+                </div>
+                <div class="videoDiv">
+                    <video autoplay="autoplay" loop="loop" width="300" height="200"> 
+                        <source src="videos/toistuva_silmukka_maara.mp4" type="video/mp4" /> 
+                    </video> 
+                </div>
+            </div>
+            <div class="manual-child">
+                <div class="manual-text">
+                    <p>
+                        Kavennukset jakavat mallin osiin joissa rivin silmukkamaara vaihtelee. 
+                        Vain yhta naista osista on mahdollista muokata kerralla. Tyonalla olevaa
+                        osaa on helppo vaihtaa paakuviota klikkaamalla.
+                    </p>
+                </div>
+                <div class="videoDiv">
+                    <video autoplay="autoplay" loop="loop" width="300" height="200"> 
+                        <source src="videos/osiot.mp4" type="video/mp4" /> 
+                    </video> 
+                </div>
+            </div>
+            <div class="manual-child">
+                <div class="manual-text">
+                    <p>
+                        Piirra toistuvat kuvio pienempaan ruudukkoon kayttamalla valitsemiasi 
+                        vareja. "Kumittaminen" onnistuu painammalla jo varitettya ruutua uudestaan
+                        samalla varilla.
+                    </p>
+                </div>
+                <div class="videoDiv">
+                    <video autoplay="autoplay" loop="loop" width="300" height="200"> 
+                        <source src="videos/toisto_piirto.mp4" type="video/mp4" /> 
+                    </video> 
+                </div>
+            </div>
+            <div class="manual-child">
+                <div class="manual-text">
+                    <p>
+                        Voit siirtaa toistuvan kuvion paakuvioon hiirella vetamalla.
+                    </p>
+                </div>
+                <div class="videoDiv">
+                    <video autoplay="autoplay" loop="loop" width="500" height="200"> 
+                        <source src="videos/drag_drop.mp4" type="video/mp4" /> 
+                    </video> 
+                </div>
+            </div>
+            <div class="manual-child">
+                <div class="manual-text">
+                    <p>
+                        Kun kavennuksia on paljon, kayta tarkennusta kuvion selkeyttamiseksi
+                    </p>
+                </div>
+                <div class="videoDiv">
+                    <video autoplay="autoplay" loop="loop" width="500" height="200"> 
+                        <source src="videos/tarkennus.mp4" type="video/mp4" /> 
+                    </video> 
+                </div>
+            </div>
+            <div class="manual-child">
+                <div class="manual-text">
+                    <p>
+                        Voit myos tehda viimeisia lisayksia suoraan paakuvioon. Tarkennus ei
+                        kuitenkaan viela toimi naihin.
+                    </p>
+                </div>
+                <div class="videoDiv">
+                    <video autoplay="autoplay" loop="loop" width="500" height="200"> 
+                        <source src="videos/varita_suoraan.mp4" type="video/mp4" /> 
+                    </video> 
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
     <div class="wrapper" id ="canvasWrapper">
         <div id=generalOptions>
+            <h2>Varivalinnat</h2>
             <div>
                 <input type="color" id="add-color" onchange="addColor()" 
                 name="add-color" value="#FFFFFF">
@@ -20,13 +150,14 @@
                 <label for="background-color">Taustavari</label>
             </div>
             <div>
-                drawing colors
+                Valitut Varit
                 <div id="drawing-color-divs" class="float-container">
                     <input type="color" id="hidden-color-change" tabindex=-1 class="hidden" onchange="changeChosenColor()">
                 </div>
             </div>
         </div>
         <div id=div1Options class=div1Options>
+            <h2>Toistuvan kuvion asetukset</h2>
             <div>
                 <form>
                     <label for="smallY">Pienen kuvion rivi maara</label><br>
@@ -34,7 +165,7 @@
                   </form> 
             </div>
             <div>
-                <label for="drawingDims"> Choose size for drawing canvas</label>
+                <label for="drawingDims">Toistuvan kuvion silmukkamaara</label>
                 <select name="drawingDims" id="drawingDims" onchange="changeDrawingCanvasSizes()">
                     <option value="18" >18</option>
                     <option value="12">12</option>
@@ -51,21 +182,22 @@
             </div>
         </div>
         <div id=div3Options class="div3Options">
+            <h2>Paakuvion Asetukset</h2>
             <div>
-                <div>
-                    <form>
-                        <label for="mainX">Paakuvion silmukka maara</label><br>
-                        <input type="number" id="mainX" name="mainX" value="36" onchange="changeMainX()"><br>
-                        <label for="mainY">Paakuvion rivi maara</label><br>
-                        <input type="number" id="mainY" name="mainY" value="42" onchange="changeMainY()"><br>
-                      </form> 
-                </div>
+                <form>
+                    <label for="mainX">Paakuvion silmukka maara</label><br>
+                    <input type="number" id="mainX" name="mainX" value="36" onchange="changeMainX()"><br>
+                    <label for="mainY">Paakuvion rivi maara</label><br>
+                    <input type="number" id="mainY" name="mainY" value="42" onchange="changeMainY()"><br>
+                    </form> 
             </div>
             <div>
-                <button id="undoMain" onclick="undoMain()">takaisin suuri</button>
-                <button id="deduction" onclick="deducationBool()">vahennys</button>
-                <button id="focus" onclick="focusOn()">focus</button>
-                <button id="drawOnMain" onclick="drawOnMainOn()">draw main</button>
+                <button id="undoMain" onclick="undoMain()">Takaisin</button>
+                <button id="deduction" onclick="deducationBool()">Kavennus</button>
+                <button id="focus" onclick="focusOn()">Tarkenna</button>
+                <button id="drawOnMain" onclick="drawOnMainOn()">Varita Suoraan</button>
+                <button id="downloadLinkButton"><a id="downloadLnk" download="YourFileName.jpg">Download as image</a>
+                </button>
             </div>
         </div>
         <div id="div1" class="template1">
@@ -76,6 +208,7 @@
             <canvas id="canvas3"  class="topCanvas"></canvas>
         </div>
       </div>      
+ 
     <script src="script.js"></script>
     <noscript>You need to enable JavaScript to view the full site.</noscript>
 </body>
