@@ -170,6 +170,8 @@ function reDrawMainCanvas() {
     deductionY = Number(coords[0]); deductionX = Number(coords[1]);
     ctx3.clearRect(deductionX+1, 0, cw-1, deductionY+cw)
     }
+  
+  
   // fill rects
   for (const x of filledRectsCanvas3) {
     coords = x.split(',');   
@@ -621,8 +623,7 @@ function changeChosenColor() {
       filledRectsCanvas3NoDeductions[x] = [y_, x_, newColor].toString()
     }
   }
-  reDrawMainCanvas()
-
+  reDrawMainCanvas();
 }
 
 // listener for dragging
@@ -785,6 +786,8 @@ colorSelectDiv.addEventListener('click', function(e) {
     var rgb = e.target.style.backgroundColor.split("(")[1].split(")")[0].split(',');
     var hex = "#" + ("000000" + rgbToHex(rgb[0], rgb[1], rgb[2])).slice(-6);
     drawingColor = hex;
+    curColorBut = document.getElementById('add-color');
+    curColorBut.value = drawingColor  
   }
 })
 
