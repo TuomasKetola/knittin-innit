@@ -6,8 +6,9 @@ let filledRectsCanvas3 = [];
 let filledRectsCanvas3NoDeductions = [];
 let mainPatternSizes = [];
 // let deductions = ['482,422', '482,47', '197,392', '197,137'];
-let deductions = []
-let currentWindowIndex = 0;
+let deductions  = ['242,92', '242,392', '197,77', '197,377']
+// let deductions = []
+let currentWindowIndex = 2;
 let windowTop = 0;
 
 let currentColorId = 0;
@@ -71,7 +72,7 @@ var cw = 15;
 
 // get colours
 let backgroundColor = document.getElementById("background-color").value
-let drawingColor = "black"
+let drawingColor = undefined;
 
 function drawBoard(gridWidth, gridHeight, cellWidth, ctx, Ytop, Ybottom, nrDeductions){
   // draws all the boards
@@ -155,6 +156,7 @@ function clickDrawToCanvas(canvas, event, cw, ctx, filledRects) {
 
 function reDrawMainCanvas() {
   // clear canvas
+  console.log(deductions)
   ctx3.clearRect(0, 0, canvas3.width, canvas3.height);
 
   // set background
@@ -172,11 +174,35 @@ function reDrawMainCanvas() {
     }
   
   
+  // new fill rects
+  // in main filled store raw repeats. 
+  // then here add deducations. -> no need to worry about focus ones
+
+  let addOn = 0;
+ 
+  // x_ += addOn;
+
+
+
+
+
   // fill rects
   for (const x of filledRectsCanvas3) {
+
     coords = x.split(',');   
     y_ = Number(coords[0]);
     x_ = Number(coords[1]);
+    col = coords[2]
+    filledRectsCanvas3NoDeductions.push([y_,x_, col].toString())
+    for (const coordString of deductions) {
+      coordsDeduction = coordString.split(',');
+      coordsDedX = Number(coordsDeduction[1]); coordsDedY = Number(coordsDeduction[0]);
+      
+      if (x_ + addOn == coordsDedX && y_ < coordsDedY) {
+        addOn += cw;
+      }
+    }
+    x_ += addOn
     color = coords[2];
     ctx3.fillStyle = color;
     ctx3.fillRect(x_+1, y_+1, cw-1, cw-1);
@@ -260,23 +286,19 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
   const rect = canvas.getBoundingClientRect();
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
-  console.log(event.clientX, event.clientX)
-  console.log(rect.left, rect.top)
   const mouseY = (y - (y%cw)) + p;
   const mouseX = (x - (x%cw)) + p;
-  console.log(mouseX, mouseY)
   var shapeSize = (maxX - minX + cw) / cw;
   const shapeSizeConst = (maxX - minX + cw) / cw;
   
   
   var patternSize = 0;
-  let addOn = 0;
+  
   let sortedFilledRects = filledRects.sort(function(x,y){
     var xp = Number(x.substring(0, x.indexOf(',')));
     var yp = Number(y.substring(0, y.indexOf(',')));
     return xp == yp ? 0 : xp < yp ? -1 : 1;
   });
-  // console.log('here')
   // make sure that if there are empty cells in the drawing board horizontally they show up when dragging
   if (shapeSize < drawingCanvasWidth) {
     for (let nrFiller=0; nrFiller<drawingCanvasWidth - shapeSizeConst; nrFiller++){
@@ -284,12 +306,12 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
       coords = coords.split(',');
       y_ = coords[1] - minY + mouseY - (mouseToDragY - minY);
       x_ = (coords[0] - minX + p);
-      // console.log([x_+cw, y_, backgroundColor].toString());
       sortedFilledRects.push([x_+cw, y_, backgroundColor].toString());
       shapeSize += 1;
     }
   }
   const nrReps = mainCanvasWidth / shapeSize;
+  let nrDeductions = nrDeducationsWindow(currentWindowIndex)
   if (mouseX > 0) { // make sure on the right canvas
     for(let i = 0; i <= nrReps - 1; i++) {  
       for (const x of sortedFilledRects) {
@@ -298,26 +320,26 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
         x_ = (coords[0] - minX + p) + i * shapeSize * cw;
         color = coords[2];
         
-        new_coordsMainNoDed = [y_, x_,color].toString();
+        // new_coordsMainNoDed = [y_, x_,color].toString();
         
         
         // make sure to jump over deductions
-        for (const coordString of deductions) {
-          coordsDeduction = coordString.split(',');
-          coordsDedX = Number(coordsDeduction[1]); coordsDedY = Number(coordsDeduction[0]);
+        // for (const coordString of deductions) {
+        //   coordsDeduction = coordString.split(',');
+        //   coordsDedX = Number(coordsDeduction[1]); coordsDedY = Number(coordsDeduction[0]);
           
-          if (x_ + addOn == coordsDedX && y_ < coordsDedY) {
-            addOn += cw;
-          }
-        }
-        x_ += addOn;
+        //   if (x_ + addOn == coordsDedX && y_ < coordsDedY) {
+        //     addOn += cw;
+        //   }
+        // }
+        // x_ += addOn;
          // dont draw outside canvas
-        if (x_+1 < mainCanvasWidth * cw 
+        if (x_+1 < mainCanvasWidth * cw - nrDeductions * cw
           && y_ < currentWindowBotttom && y_ > currentWindowTop - cw) {
           new_coordsMain = [y_, x_,color].toString();
           filledRectsCanvas3.push(new_coordsMain);
-          patternSize += 1;
-          filledRectsCanvas3NoDeductions.push(new_coordsMainNoDed);
+          // patternSize += 1;
+          // filledRectsCanvas3NoDeductions.push(new_coordsMainNoDed);
         }
       }
     }
@@ -644,8 +666,10 @@ canvasTop.addEventListener('click', function(e) {
     drawingColor = hex;
   }
   else {
-    clickDrawToCanvas(canvasBottom, e, cw, ctxBottom, filledRectsCanvasTop);
-    clickDrawToCanvas(canvasTop, e, cw, ctxTop, filledRectsCanvasBottom);
+    if (drawingColor){
+      clickDrawToCanvas(canvasBottom, e, cw, ctxBottom, filledRectsCanvasTop);
+      clickDrawToCanvas(canvasTop, e, cw, ctxTop, filledRectsCanvasBottom);
+    }
   }
 })
 
@@ -662,7 +686,6 @@ dragOverHandler = function(e) {
 
 document.addEventListener('dragover', dragOverHandler);
 document.addEventListener('drop', function(e) {
-  console.log('here')
   drawFigToCanvas(canvas3, e, cw, ctx3, filledRectsCanvasTop)
 })  
 // 
@@ -815,7 +838,6 @@ downloadLnk.addEventListener('click', download, false);
 drawBoard(smallCanvasWidth, smallCanvasHeight, cw, ctxBottom);
 drawBoard(mainCanvasWidth, mainCanvasHeight, cw, ctx3)
 reDrawMainCanvas();
-// console.log(filledRectsCanvas3)
 // Get the modal
 var modal = document.getElementById("manualModal");
 
