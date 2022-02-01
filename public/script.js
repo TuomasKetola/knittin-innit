@@ -258,8 +258,11 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
   const rect = canvas.getBoundingClientRect();
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
+  console.log(event.clientX, event.clientX)
+  console.log(rect.left, rect.top)
   const mouseY = (y - (y%cw)) + p;
   const mouseX = (x - (x%cw)) + p;
+  console.log(mouseX, mouseY)
   var shapeSize = (maxX - minX + cw) / cw;
   const shapeSizeConst = (maxX - minX + cw) / cw;
   
@@ -271,7 +274,7 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
     var yp = Number(y.substring(0, y.indexOf(',')));
     return xp == yp ? 0 : xp < yp ? -1 : 1;
   });
-  
+  // console.log('here')
   // make sure that if there are empty cells in the drawing board horizontally they show up when dragging
   if (shapeSize < drawingCanvasWidth) {
     for (let nrFiller=0; nrFiller<drawingCanvasWidth - shapeSizeConst; nrFiller++){
@@ -279,15 +282,14 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
       coords = coords.split(',');
       y_ = coords[1] - minY + mouseY - (mouseToDragY - minY);
       x_ = (coords[0] - minX + p);
-      console.log([x_+cw, y_, backgroundColor].toString());
+      // console.log([x_+cw, y_, backgroundColor].toString());
       sortedFilledRects.push([x_+cw, y_, backgroundColor].toString());
       shapeSize += 1;
     }
   }
   const nrReps = mainCanvasWidth / shapeSize;
   if (mouseX > 0) { // make sure on the right canvas
-    for(let i = 0; i <= nrReps - 1; i++) {
-      
+    for(let i = 0; i <= nrReps - 1; i++) {  
       for (const x of sortedFilledRects) {
         coords = x.split(',');
         y_ = coords[1] - minY + mouseY - (mouseToDragY - minY);
@@ -646,11 +648,23 @@ canvasTop.addEventListener('click', function(e) {
   }
 })
 
-// listener for dragend
-canvasTop.addEventListener('dragend', function(e) {
-  drawFigToCanvas(canvas3, e, cw, ctx3, filledRectsCanvasTop)
-})
+// listener for dragend || THIS ONLY WORKS WITH CHROME. BELOW SOLUTION
+// canvasTop.addEventListener('dragend', function(e) {
+//   drawFigToCanvas(canvas3, e, cw, ctx3, filledRectsCanvasTop)
+// })
+// SOLUTION:
+// ################
+dragOverHandler = function(e) {
+  e.preventDefault();
+  return false;
+}
 
+document.addEventListener('dragover', dragOverHandler);
+document.addEventListener('drop', function(e) {
+  console.log('here')
+  drawFigToCanvas(canvas3, e, cw, ctx3, filledRectsCanvasTop)
+})  
+// 
 
 // listener for clicking main canvas
 canvas3.addEventListener('click', function(e) {
@@ -823,41 +837,4 @@ window.onclick = function(event) {
   if (event.target == modal) {
     modal.style.display = "none";
   }
-} 
-
-document.addEventListener('DOMContentLoaded', function() {
-  const loadEl = document.querySelector('#load');
-  // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-  // // The Firebase SDK is initialized and available here!
-  //
-  // firebase.auth().onAuthStateChanged(user => { });
-  // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-  // firebase.firestore().doc('/foo/bar').get().then(() => { });
-  // firebase.functions().httpsCallable('yourFunction')().then(() => { });
-  // firebase.messaging().requestPermission().then(() => { });
-  // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-  // firebase.analytics(); // call to activate
-  // firebase.analytics().logEvent('tutorial_completed');
-  // firebase.performance(); // call to activate
-  //
-  // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-
-  try {
-    let app = firebase.app();
-    let features = [
-      'auth', 
-      'database', 
-      'firestore',
-      'functions',
-      'messaging', 
-      'storage', 
-      'analytics', 
-      'remoteConfig',
-      'performance',
-    ].filter(feature => typeof app[feature] === 'function');
-    loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
-  } catch (e) {
-    console.error(e);
-    loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
-  }
-});
+}
