@@ -137,15 +137,9 @@ div.float-child > float-child {
 }
 .videoDiv{
   float:right;
-  /* border: 2px solid red; */
+  border: 1px solid black;
 } 
-/* div.manual-child {
-  border:1px solid white;
+.manual-button{
+  width: 400px;
+  height:50px
 }
-
-div.manual-child> manual-text {
-  display:inline-block;
-  background-color: #CCC;
-  padding: 10px;
-  margin:0
-} */

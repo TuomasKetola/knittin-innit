@@ -5,8 +5,8 @@ let filledRectsCanvas3 = [];
 // let filledRectsCanvas3 = ['392,2,#00ff00', '377,17,#00ff00', '392,32,#00ff00', '377,47,#00ff00', '392,62,#00ff00', '377,77,#00ff00', '392,92,#00ff00', '377,122,#00ff00', '392,137,#00ff00', '377,152,#00ff00', '392,167,#00ff00', '377,182,#00ff00', '392,197,#00ff00', '377,212,#00ff00', '392,227,#00ff00', '377,242,#00ff00', '392,257,#00ff00', '377,272,#00ff00', '392,287,#00ff00', '377,302,#00ff00', '392,317,#00ff00', '377,332,#00ff00', '392,347,#00ff00', '377,362,#00ff00', '392,377,#00ff00', '377,392,#00ff00', '392,407,#00ff00', '377,437,#00ff00', '392,452,#00ff00', '377,467,#00ff00', '392,482,#00ff00', '377,497,#00ff00', '392,512,#00ff00', '377,527,#00ff00']
 let filledRectsCanvas3NoDeductions = [];
 let mainPatternSizes = [];
-let deductions = ['482,422', '482,47', '197,392', '197,137'];
-// let deductions = []
+// let deductions = ['482,422', '482,47', '197,392', '197,137'];
+let deductions = []
 let currentWindowIndex = 0;
 let windowTop = 0;
 
@@ -824,3 +824,5 @@ window.onclick = function(event) {
     modal.style.display = "none";
   }
 } 
+
+// console.log(firebase)
