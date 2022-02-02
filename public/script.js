@@ -175,38 +175,31 @@ function reDrawMainCanvas() {
   
   
   // new fill rects
-  // in main filled store raw repeats. 
-  // then here add deducations. -> no need to worry about focus ones
+  let dedXs = [];
+  for (const coordString of deductions) {
+    coordsDeduction = coordString.split(',');
+    coordsDedX = Number(coordsDeduction[1]); coordsDedY = Number(coordsDeduction[0]);
+    dedXs.push(coordsDedX)
+  }
 
+  let coordIx = 0;
   let addOn = 0;
- 
-  // x_ += addOn;
-
-
-
-
-
-  // fill rects
-  for (const x of filledRectsCanvas3) {
-
-    coords = x.split(',');   
+  while (coordIx < filledRectsCanvas3.length) {
+    coords = filledRectsCanvas3[coordIx].split(',')
     y_ = Number(coords[0]);
     x_ = Number(coords[1]);
-    col = coords[2]
-    filledRectsCanvas3NoDeductions.push([y_,x_, col].toString())
-    for (const coordString of deductions) {
-      coordsDeduction = coordString.split(',');
-      coordsDedX = Number(coordsDeduction[1]); coordsDedY = Number(coordsDeduction[0]);
-      
-      if (x_ + addOn == coordsDedX && y_ < coordsDedY) {
-        addOn += cw;
-      }
-    }
-    x_ += addOn
+      filledRectsCanvas3NoDeductions.push([y_,x_, color].toString())
     color = coords[2];
-    ctx3.fillStyle = color;
-    ctx3.fillRect(x_+1, y_+1, cw-1, cw-1);
-  };
+    if (dedXs.includes(x_+addOn)){
+      addOn += cw;
+    }
+    else{
+      coordIx += 1;
+      ctx3.fillStyle = color;
+
+      ctx3.fillRect(x_+1 +addOn, y_+1, cw-1, cw-1);
+    }
+  }
   
   // make window
   deductionsReverse = deductions.sort().reverse();
