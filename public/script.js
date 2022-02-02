@@ -5,9 +5,9 @@ let filledRectsCanvas3 = [];
 // let filledRectsCanvas3 = ['392,2,#00ff00', '377,17,#00ff00', '392,32,#00ff00', '377,47,#00ff00', '392,62,#00ff00', '377,77,#00ff00', '392,92,#00ff00', '377,122,#00ff00', '392,137,#00ff00', '377,152,#00ff00', '392,167,#00ff00', '377,182,#00ff00', '392,197,#00ff00', '377,212,#00ff00', '392,227,#00ff00', '377,242,#00ff00', '392,257,#00ff00', '377,272,#00ff00', '392,287,#00ff00', '377,302,#00ff00', '392,317,#00ff00', '377,332,#00ff00', '392,347,#00ff00', '377,362,#00ff00', '392,377,#00ff00', '377,392,#00ff00', '392,407,#00ff00', '377,437,#00ff00', '392,452,#00ff00', '377,467,#00ff00', '392,482,#00ff00', '377,497,#00ff00', '392,512,#00ff00', '377,527,#00ff00']
 let filledRectsCanvas3NoDeductions = [];
 let mainPatternSizes = [];
-// let deductions = ['482,422', '482,47', '197,392', '197,137'];
+let deductions = ['482,422', '482,47', '197,392', '197,137'];
 // let deductions  = ['242,92', '242,392', '197,77', '197,377']
-let deductions = []
+// let deductions = []
 // let deductions = ['362,257', '362,107', '257,2', '257,122']
 // let deductions = ["62,152","62,107","512,62","512,212","422,77","422,197","317,77","317,182","182,92","182,167"];
 let currentWindowIndex = 1;
@@ -40,6 +40,8 @@ let addingDeduction = false;
 let focus = false;
 let drawMain = false;
 let deductionYs = [];
+
+let patternIX = 0;
 
 let isChecked = false;
 
@@ -180,6 +182,7 @@ function reDrawMainCanvas() {
   // new fill rects
   let dedXs = [];
   var deducationsDict = {};
+  var pIXPrevious = 0;
   for (const coordString of deductions) {
     coordsDeduction = coordString.split(',');
     coordsDedX = Number(coordsDeduction[1]); coordsDedY = Number(coordsDeduction[0]);
@@ -193,9 +196,12 @@ function reDrawMainCanvas() {
     coords = filledRectsCanvas3[coordIx].split(',')
     y_ = Number(coords[0]);
     x_ = Number(coords[1]);
-      filledRectsCanvas3NoDeductions.push([y_,x_, color].toString())
+    pIX = Number(coords[3])
+    filledRectsCanvas3NoDeductions.push([y_,x_, color].toString())
     color = coords[2];
-
+    if (pIX > pIXPrevious) {
+      addOn = 0
+    }
     if (dedXs.includes(x_+addOn) && y_ < deducationsDict[x_+addOn]){
       addOn += cw;
     }
@@ -205,6 +211,7 @@ function reDrawMainCanvas() {
 
       ctx3.fillRect(x_+1 +addOn, y_+1, cw-1, cw-1);
     }
+    pIXPrevious = pIX
   }
   
   // make window
@@ -228,10 +235,10 @@ function reDrawMainCanvas() {
       deductionIndex += 1
     }
     if (deductionIndex == currentWindowIndex) {
-      topY = y;
+      topY = y + cw;
       if (deductionIndex != 0) {
         dedCoordsPrevious = deductionsReverse[ix - 1].split(',');
-        bottomY = Number(dedCoordsPrevious[0]);
+        bottomY = Number(dedCoordsPrevious[0]) + cw;
       }
       break
     };
@@ -240,7 +247,7 @@ function reDrawMainCanvas() {
   };
   
   if (currentWindowIndex > deductionIndex && deductions.length > 0) {
-    bottomY = y;
+    bottomY = y + cw;
     topY = 0;
 
   };
@@ -288,6 +295,7 @@ function reDrawMainCanvas() {
 
 function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
   // drag and drop fig from canvas to another 
+  patternIX += 1
   const rect = canvas.getBoundingClientRect();
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
@@ -326,8 +334,8 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
         color = coords[2];
          // dont draw outside canvas
         if (x_+1 < mainCanvasWidth * cw - nrDeductions * cw
-          && y_ < currentWindowBotttom && y_ > currentWindowTop - cw) {
-          new_coordsMain = [y_, x_,color].toString();
+          && y_ < currentWindowBotttom + cw && y_ > currentWindowTop - cw) {
+          new_coordsMain = [y_, x_,color,patternIX].toString();
           filledRectsCanvas3.push(new_coordsMain);
           // patternSize += 1;
         }
@@ -504,8 +512,11 @@ function changeSmallY() {
   // button function change the Y axis of drawing canvas
   smallY = document.getElementById("smallY").value;
   smallCanvasHeight = smallY;
+  drawingCanvasHeight = smallCanvasHeight
   ctxBottom.clearRect(0, 0, canvasBottom.width, canvasBottom.height);
   ctxTop.clearRect(0, 0, canvasTop.width, canvasTop.height);
+  filledRectsCanvasBottom = []
+  filledRectsCanvasTop = []
   drawBoard(smallCanvasWidth, smallCanvasHeight, cw, ctxBottom);
   drawBoard(smallCanvasWidth, smallCanvasHeight, cw, ctxTop);
 }
