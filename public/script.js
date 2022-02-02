@@ -6,9 +6,11 @@ let filledRectsCanvas3 = [];
 let filledRectsCanvas3NoDeductions = [];
 let mainPatternSizes = [];
 // let deductions = ['482,422', '482,47', '197,392', '197,137'];
-let deductions  = ['242,92', '242,392', '197,77', '197,377']
+// let deductions  = ['242,92', '242,392', '197,77', '197,377']
 // let deductions = []
-let currentWindowIndex = 2;
+let deductions = ['362,257', '362,107', '257,2', '257,122']
+// let deductions = ["62,152","62,107","512,62","512,212","422,77","422,197","317,77","317,182","182,92","182,167"];
+let currentWindowIndex = 1;
 let windowTop = 0;
 
 let currentColorId = 0;
@@ -24,7 +26,8 @@ let maxX = 1;
 let currentWindowTop = 0;
 let currentWindowBotttom = 1000;
 
-let mainCanvasWidth = 36;
+// let mainCanvasWidth = 36;
+let mainCanvasWidth = 18;
 let mainCanvasHeight = 42;
 let smallCanvasWidth = 4;
 let smallCanvasHeight = 18;
@@ -156,7 +159,6 @@ function clickDrawToCanvas(canvas, event, cw, ctx, filledRects) {
 
 function reDrawMainCanvas() {
   // clear canvas
-  console.log(deductions)
   ctx3.clearRect(0, 0, canvas3.width, canvas3.height);
 
   // set background
@@ -176,9 +178,11 @@ function reDrawMainCanvas() {
   
   // new fill rects
   let dedXs = [];
+  var deducationsDict = {};
   for (const coordString of deductions) {
     coordsDeduction = coordString.split(',');
     coordsDedX = Number(coordsDeduction[1]); coordsDedY = Number(coordsDeduction[0]);
+    deducationsDict[coordsDedX] = coordsDedY
     dedXs.push(coordsDedX)
   }
 
@@ -190,7 +194,8 @@ function reDrawMainCanvas() {
     x_ = Number(coords[1]);
       filledRectsCanvas3NoDeductions.push([y_,x_, color].toString())
     color = coords[2];
-    if (dedXs.includes(x_+addOn)){
+
+    if (dedXs.includes(x_+addOn) && y_ < deducationsDict[x_+addOn]){
       addOn += cw;
     }
     else{
@@ -202,14 +207,19 @@ function reDrawMainCanvas() {
   }
   
   // make window
-  deductionsReverse = deductions.sort().reverse();
+  
+  let deductionsReverse = deductions.sort(function(x,y){
+    var xp = Number(x.substring(0, x.indexOf(',')));
+    var yp = Number(y.substring(0, y.indexOf(',')));
+    return xp == yp ? 0 : xp < yp ? -1 : 1;
+  }).reverse();
+  
   
   let previousY = mainCanvasHeight * cw;
   let bottomY = previousY
   let deductionIndex = -1
   let nrDeductions = 0;
   for (var ix = 0  ; ix <= deductionsReverse.length - 1; ix ++)  {
-    
     dedCoords = deductionsReverse[ix].split(',');
     y = Number(dedCoords[0]);
     x = Number(dedCoords[1]);
@@ -227,10 +237,11 @@ function reDrawMainCanvas() {
     previousY = y;
     nrDeductions += 1;
   };
-
+  
   if (currentWindowIndex > deductionIndex && deductions.length > 0) {
     bottomY = y;
     topY = 0;
+
   };
   
   // do window shading
@@ -312,27 +323,12 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
         y_ = coords[1] - minY + mouseY - (mouseToDragY - minY);
         x_ = (coords[0] - minX + p) + i * shapeSize * cw;
         color = coords[2];
-        
-        // new_coordsMainNoDed = [y_, x_,color].toString();
-        
-        
-        // make sure to jump over deductions
-        // for (const coordString of deductions) {
-        //   coordsDeduction = coordString.split(',');
-        //   coordsDedX = Number(coordsDeduction[1]); coordsDedY = Number(coordsDeduction[0]);
-          
-        //   if (x_ + addOn == coordsDedX && y_ < coordsDedY) {
-        //     addOn += cw;
-        //   }
-        // }
-        // x_ += addOn;
          // dont draw outside canvas
         if (x_+1 < mainCanvasWidth * cw - nrDeductions * cw
           && y_ < currentWindowBotttom && y_ > currentWindowTop - cw) {
           new_coordsMain = [y_, x_,color].toString();
           filledRectsCanvas3.push(new_coordsMain);
           // patternSize += 1;
-          // filledRectsCanvas3NoDeductions.push(new_coordsMainNoDed);
         }
       }
     }
@@ -756,7 +752,12 @@ canvas3.addEventListener('click', function(e) {
     const y = e.clientY - rect.top;
     
     let previousY = mainCanvasHeight * cw;
-    deductionsReverse = deductions.sort().reverse();
+    // deductionsReverse = deductions.sort().reverse();
+    let deductionsReverse = deductions.sort(function(x,y){
+      var xp = Number(x.substring(0, x.indexOf(',')));
+      var yp = Number(y.substring(0, y.indexOf(',')));
+      return xp == yp ? 0 : xp < yp ? -1 : 1;
+    }).reverse();
     let deductionIndex = -1
     for (var ix = 0  ; ix <= deductionsReverse.length - 1; ix ++)  {
             
@@ -783,11 +784,13 @@ canvas3.addEventListener('click', function(e) {
       }
       if (y < bottomY && y >topY) {
         currentWindowIndex = deductionIndex
+        // break
       }
       previousY = y_;
     };
 
   };
+
   let nrDeductions = nrDeducationsWindow(currentWindowIndex);
   changeMainCanvasSizes(nrDeductions);
   reDrawMainCanvas()
