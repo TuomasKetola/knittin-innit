@@ -27,7 +27,7 @@ let currentWindowTop = 0;
 let currentWindowBotttom = 1000;
 
 // let mainCanvasWidth = 36;
-let mainCanvasWidth = 18;
+let mainCanvasWidth = 36;
 let mainCanvasHeight = 42;
 let smallCanvasWidth = 4;
 let smallCanvasHeight = 18;
@@ -103,7 +103,8 @@ function drawBoard(gridWidth, gridHeight, cellWidth, ctx, Ytop, Ybottom, nrDeduc
     ctx.fillStyle = "black";
     for (var x = 0  ; x <= cellWidth * gridWidth - (1 * cellWidth); x += cellWidth) {
       ctx.font = 10 +"px Arial";
-      ctx.fillText(x /cw + 2, x + (cw / 3), gridHeight*cw + cw);
+      ctx.fillText(x /cw + 1 , x + (cw / 3), gridHeight*cw + cw);
+      console.log(x /cw + 2, x + (cw / 3))
     }
 
     for (var y = 0  ; y <= cellWidth * gridHeight - (1 * cellWidth); y += cellWidth) {
@@ -603,6 +604,7 @@ function addColor() {
   let newColor= document.getElementById("add-color").value;
   newDiv = document.createElement("div");
   newDiv.style.background = newColor;
+  newDiv.style.border = "1px solid black";
   newDiv.id = "color-"+String(currentColorId);
   newDiv.className = "float-child";
   document.getElementById("drawing-color-divs").appendChild(newDiv);
