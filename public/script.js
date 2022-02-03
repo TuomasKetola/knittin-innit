@@ -10,7 +10,7 @@ let mainPatternSizes = [];
 let deductions = []
 // let deductions = ['362,257', '362,107', '257,2', '257,122']
 // let deductions = ["62,152","62,107","512,62","512,212","422,77","422,197","317,77","317,182","182,92","182,167"];
-let currentWindowIndex = 2;
+let currentWindowIndex = 0;
 let windowTop = 0;
 
 let currentColorId = 0;
