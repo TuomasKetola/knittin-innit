@@ -14,7 +14,7 @@ For Example:
 The purpose of this web app is to make solving these issues easy, whilst ensuring that
 the integrity of the pattern and the design.
 
-## Future plans
+## Future plans
 Currently the app is best used by coping the size and stitch deduction coordinates from an
 exsisting model. It would be great to have an option where one can simply choose a yarn thickness
 and a jumper size and the program would do the rest.
