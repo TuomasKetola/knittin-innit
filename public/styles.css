@@ -107,7 +107,7 @@ div.float-child > float-child {
   margin: 15% auto; /* 15% from the top and centered */
   padding: 20px;
   border: 1px solid #888;
-  width: 80%; /* Could be more or less, depending on screen size */
+  width: 90%; /* Could be more or less, depending on screen size */
 }
 
 /* The Close Button */
@@ -141,8 +141,28 @@ div.float-child > float-child {
 .videoDiv{
   float:right;
   border: 1px solid black;
+  height: 240;
+  max-width: 60%;
+} 
+.videoInsert{
+  float:right;
+  border: 1px solid black;
+  height: 230;
 } 
 .manual-button{
   width: 400px;
   height:50px
 }
+
+/* .videoInsert {
+  /* position: absolute;  */
+  /* right: 0;  */
+  /* bottom: 0; */
+  min-width: 20%; 
+  min-height: 100%;
+  width: auto; 
+  height: auto; 
+  z-index: -100;
+  background-size: cover;
+  overflow: hidden;
+} */
