@@ -27,12 +27,14 @@ let maxX = 1;
 let currentWindowTop = 0;
 let currentWindowBotttom = 1000;
 
-let mainCanvasWidth = 36
+// let mainCanvasWidth = 36
+let mainCanvasWidth = document.getElementById("mainX").value;
 // let mainCanvasWidth = 16;
-let mainCanvasHeight = 42;
+// let mainCanvasHeight = 42;
+let mainCanvasHeight = document.getElementById("mainY").value;
 let smallCanvasWidth = 4;
-let smallCanvasHeight = 18;
-let drawingCanvasHeight = 18;
+let smallCanvasHeight = document.getElementById("smallY").value;;
+let drawingCanvasHeight = document.getElementById("smallY").value;;
 let drawingCanvasWidth = 4;
 
 let selectingColor = false;
