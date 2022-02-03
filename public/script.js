@@ -3,14 +3,14 @@ let filledRectsCanvasBottom = [];
 let filledRectsCanvas2 = [];
 let filledRectsCanvas3 = [];
 // let filledRectsCanvas3 = ['392,2,#00ff00', '377,17,#00ff00', '392,32,#00ff00', '377,47,#00ff00', '392,62,#00ff00', '377,77,#00ff00', '392,92,#00ff00', '377,122,#00ff00', '392,137,#00ff00', '377,152,#00ff00', '392,167,#00ff00', '377,182,#00ff00', '392,197,#00ff00', '377,212,#00ff00', '392,227,#00ff00', '377,242,#00ff00', '392,257,#00ff00', '377,272,#00ff00', '392,287,#00ff00', '377,302,#00ff00', '392,317,#00ff00', '377,332,#00ff00', '392,347,#00ff00', '377,362,#00ff00', '392,377,#00ff00', '377,392,#00ff00', '392,407,#00ff00', '377,437,#00ff00', '392,452,#00ff00', '377,467,#00ff00', '392,482,#00ff00', '377,497,#00ff00', '392,512,#00ff00', '377,527,#00ff00']
-let filledRectsCanvas3NoDeductions = [];
+// let filledRectsCanvas3NoDeductions = [];
 let mainPatternSizes = [];
 // let deductions = ['482,422', '482,47', '197,392', '197,137'];
 // let deductions  = ['242,92', '242,392', '197,77', '197,377']
 let deductions = []
 // let deductions = ['362,257', '362,107', '257,2', '257,122']
 // let deductions = ["62,152","62,107","512,62","512,212","422,77","422,197","317,77","317,182","182,92","182,167"];
-let currentWindowIndex = 1;
+let currentWindowIndex = 2;
 let windowTop = 0;
 
 let currentColorId = 0;
@@ -106,7 +106,6 @@ function drawBoard(gridWidth, gridHeight, cellWidth, ctx, Ytop, Ybottom, nrDeduc
     for (var x = 0  ; x <= cellWidth * gridWidth - (1 * cellWidth); x += cellWidth) {
       ctx.font = 10 +"px Arial";
       ctx.fillText(x /cw + 1 , x + (cw / 3), gridHeight*cw + cw);
-      console.log(x /cw + 2, x + (cw / 3))
     }
 
     for (var y = 0  ; y <= cellWidth * gridHeight - (1 * cellWidth); y += cellWidth) {
@@ -127,28 +126,15 @@ function clickDrawToCanvas(canvas, event, cw, ctx, filledRects) {
   const find = filledRects.includes(new_coords);
   ctx.beginPath();
 
+
   // make sure the drawing is on the canvas
   if (cx < drawingCanvasWidth * cw && cy < drawingCanvasHeight * cw) { 
-    
-    if (cx < minX) {minX = cx};
-
-    if (cy < minY) {minY = cy};
-
-    if (cy > maxY) {maxY = cy};
-    
-    if (cx > maxX) {maxX = cx};
     
     if (find){
       
       const ix = filledRects.indexOf(new_coords);
       ctx.clearRect(cx+1, cy+1, cw-1, cw-1);  
       filledRects.splice(ix, 1)
-      if (cx == maxX) {
-        maxX = maxX - cw
-      }
-      if (cx == minX) {
-        minX = minX + cw
-      }
       ctx.strokeStyle = "black";
       ctx.stroke();
     }
@@ -158,7 +144,72 @@ function clickDrawToCanvas(canvas, event, cw, ctx, filledRects) {
       filledRects.push(new_coords) 
     };
   }
+  let Xs = [];
+  let Ys = [];
+  for (const coordsString of filledRects){
+    coords = coordsString.split(',');
+    Xs.push(Number(coords[0]));
+    Ys.push(Number(coords[1]))
+  }
+  minX = p;
+  maxX = Math.max(...Xs);
+  minY = Math.min(...Ys);
+  maxY = Math.max(...Ys);
 }
+
+
+function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
+  // drag and drop fig from canvas to another 
+  let Xs = [];
+  let Ys = [];
+  for (const coordsString of filledRects){
+    coords = coordsString.split(',');
+    Xs.push(Number(coords[0]));
+    Ys.push(Number(coords[1]))
+  }
+
+  patternIX += 1
+  const rect = canvas.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+  const mouseY = (y - (y%cw)) + p;
+  const mouseX = (x - (x%cw)) + p;
+  var shapeSize = drawingCanvasWidth;
+  
+  
+  var patternSize = 0;
+  
+  let sortedFilledRects = filledRects.sort(function(x,y){
+    var xp = Number(x.substring(0, x.indexOf(',')));
+    var yp = Number(y.substring(0, y.indexOf(',')));
+    return xp == yp ? 0 : xp < yp ? -1 : 1;
+  });
+  const nrReps = mainCanvasWidth / shapeSize;
+  let nrDeductions = nrDeducationsWindow(currentWindowIndex)
+  if (mouseX > 0) { // make sure on the right canvas
+    for(let i = 0; i <= nrReps - 1; i++) {  
+      for (const x of sortedFilledRects) {
+        coords = x.split(',');
+        y_ = Number(coords[1]) - minY + mouseY - (mouseToDragY - minY);
+        x_ = Number(coords[0]) + i * shapeSize * cw;
+        
+        color = coords[2];
+        console.log('x',x_, color,i * shapeSize * cw)
+         // dont draw outside canvas
+        if (x_+1 < mainCanvasWidth * cw - nrDeductions * cw
+          && y_ < currentWindowBotttom + cw && y_ > currentWindowTop - cw
+          && x_ > 0) {
+          new_coordsMain = [y_, x_,color,patternIX].toString();
+          filledRectsCanvas3.push(new_coordsMain);
+          patternSize += 1;
+        }
+      }
+    }
+    mainPatternSizes.push(patternSize);
+  }
+  reDrawMainCanvas();
+}
+
 
 function reDrawMainCanvas() {
   // clear canvas
@@ -192,27 +243,34 @@ function reDrawMainCanvas() {
 
   let coordIx = 0;
   let addOn = 0;
+  
+
+  // console.log(filledRectsCanvasTop)
+  // console.log(filledRectsCanvas3)
+  let filledRectsCanvas3NoDeductions = [];
   while (coordIx < filledRectsCanvas3.length) {
     coords = filledRectsCanvas3[coordIx].split(',')
     y_ = Number(coords[0]);
     x_ = Number(coords[1]);
     pIX = Number(coords[3])
-    filledRectsCanvas3NoDeductions.push([y_,x_, color].toString())
+    
     color = coords[2];
     if (pIX > pIXPrevious) {
       addOn = 0
     }
-    if (dedXs.includes(x_+addOn) && y_ < deducationsDict[x_+addOn]){
+    if (dedXs.includes(x_+addOn) && y_ <= deducationsDict[x_+addOn]){
       addOn += cw;
     }
     else{
+      filledRectsCanvas3NoDeductions.push([y_,x_, color].toString())
       coordIx += 1;
       ctx3.fillStyle = color;
-
       ctx3.fillRect(x_+1 +addOn, y_+1, cw-1, cw-1);
     }
     pIXPrevious = pIX
   }
+  // console.log(filledRectsCanvas3);
+  // console.log(filledRectsCanvas3NoDeductions);
   
   // make window
   
@@ -273,6 +331,7 @@ function reDrawMainCanvas() {
   }
   
   //focus window
+  // console.log(nrDeductions)
   if (focus) {
     ctx3.clearRect(0,topY, mainCanvasWidth * cw+p, bottomY - topY);
     ctx3.fillStyle = backgroundColor;
@@ -291,59 +350,6 @@ function reDrawMainCanvas() {
       }
   }
   }
-}
-
-function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
-  // drag and drop fig from canvas to another 
-  patternIX += 1
-  const rect = canvas.getBoundingClientRect();
-  const x = event.clientX - rect.left;
-  const y = event.clientY - rect.top;
-  const mouseY = (y - (y%cw)) + p;
-  const mouseX = (x - (x%cw)) + p;
-  var shapeSize = (maxX - minX + cw) / cw;
-  const shapeSizeConst = (maxX - minX + cw) / cw;
-  
-  
-  var patternSize = 0;
-  
-  let sortedFilledRects = filledRects.sort(function(x,y){
-    var xp = Number(x.substring(0, x.indexOf(',')));
-    var yp = Number(y.substring(0, y.indexOf(',')));
-    return xp == yp ? 0 : xp < yp ? -1 : 1;
-  });
-  // make sure that if there are empty cells in the drawing board horizontally they show up when dragging
-  if (shapeSize < drawingCanvasWidth) {
-    for (let nrFiller=0; nrFiller<drawingCanvasWidth - shapeSizeConst; nrFiller++){
-      coords = sortedFilledRects[sortedFilledRects.length -1];
-      coords = coords.split(',');
-      y_ = coords[1] - minY + mouseY - (mouseToDragY - minY);
-      x_ = (coords[0] - minX + p);
-      sortedFilledRects.push([x_+cw, y_, backgroundColor].toString());
-      shapeSize += 1;
-    }
-  }
-  const nrReps = mainCanvasWidth / shapeSize;
-  let nrDeductions = nrDeducationsWindow(currentWindowIndex)
-  if (mouseX > 0) { // make sure on the right canvas
-    for(let i = 0; i <= nrReps - 1; i++) {  
-      for (const x of sortedFilledRects) {
-        coords = x.split(',');
-        y_ = coords[1] - minY + mouseY - (mouseToDragY - minY);
-        x_ = (coords[0] - minX + p) + i * shapeSize * cw;
-        color = coords[2];
-         // dont draw outside canvas
-        if (x_+1 < mainCanvasWidth * cw - nrDeductions * cw
-          && y_ < currentWindowBotttom + cw && y_ > currentWindowTop - cw) {
-          new_coordsMain = [y_, x_,color,patternIX].toString();
-          filledRectsCanvas3.push(new_coordsMain);
-          // patternSize += 1;
-        }
-      }
-    }
-    mainPatternSizes.push(patternSize);
-  }
-  reDrawMainCanvas();
 }
 
 
@@ -450,7 +456,6 @@ function undoMain() {
   // button function to undo main
   lastSize = mainPatternSizes[mainPatternSizes.length - 1];
   filledRectsCanvas3.splice(filledRectsCanvas3.length - lastSize);
-  filledRectsCanvas3NoDeductions.splice(filledRectsCanvas3NoDeductions.length - lastSize);
   mainPatternSizes.pop();
   reDrawMainCanvas();
 }
