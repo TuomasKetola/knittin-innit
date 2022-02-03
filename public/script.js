@@ -8,6 +8,7 @@ let mainPatternSizes = [];
 // let deductions = ['482,422', '482,47', '197,392', '197,137'];
 // let deductions  = ['242,92', '242,392', '197,77', '197,377']
 let deductions = []
+// let deductions = ['92,62', '92,182', '437,227', '437,107', '317,2', '317,122', '182,47', '182,167', '17,77', '17,152']
 // let deductions = ['362,257', '362,107', '257,2', '257,122']
 // let deductions = ["62,152","62,107","512,62","512,212","422,77","422,197","317,77","317,182","182,92","182,167"];
 let currentWindowIndex = 0;
@@ -26,8 +27,8 @@ let maxX = 1;
 let currentWindowTop = 0;
 let currentWindowBotttom = 1000;
 
-// let mainCanvasWidth = 36;
-let mainCanvasWidth = 36;
+let mainCanvasWidth = 36
+// let mainCanvasWidth = 16;
 let mainCanvasHeight = 42;
 let smallCanvasWidth = 4;
 let smallCanvasHeight = 18;
@@ -194,7 +195,6 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
         x_ = Number(coords[0]) + i * shapeSize * cw;
         
         color = coords[2];
-        console.log('x',x_, color,i * shapeSize * cw)
          // dont draw outside canvas
         if (x_+1 < mainCanvasWidth * cw - nrDeductions * cw
           && y_ < currentWindowBotttom + cw && y_ > currentWindowTop - cw
@@ -245,8 +245,6 @@ function reDrawMainCanvas() {
   let addOn = 0;
   
 
-  // console.log(filledRectsCanvasTop)
-  // console.log(filledRectsCanvas3)
   let filledRectsCanvas3NoDeductions = [];
   while (coordIx < filledRectsCanvas3.length) {
     coords = filledRectsCanvas3[coordIx].split(',')
@@ -269,8 +267,6 @@ function reDrawMainCanvas() {
     }
     pIXPrevious = pIX
   }
-  // console.log(filledRectsCanvas3);
-  // console.log(filledRectsCanvas3NoDeductions);
   
   // make window
   
@@ -331,7 +327,6 @@ function reDrawMainCanvas() {
   }
   
   //focus window
-  // console.log(nrDeductions)
   if (focus) {
     ctx3.clearRect(0,topY, mainCanvasWidth * cw+p, bottomY - topY);
     ctx3.fillStyle = backgroundColor;
@@ -577,7 +572,13 @@ function nrDeducationsWindow(windowIx) {
   if (currentWindowIndex == 0) {
     return 0
   }
-  for (const deduction of deductions.sort().reverse()) {
+  
+  let deductionsReverse = deductions.sort(function(x,y){
+    var xp = Number(x.substring(0, x.indexOf(',')));
+    var yp = Number(y.substring(0, y.indexOf(',')));
+    return xp == yp ? 0 : xp < yp ? -1 : 1;
+  }).reverse();
+  for (const deduction of deductionsReverse) {
     coords = deduction.split(',')
     y = Number(coords[0]); x = Number(coords[1]);
     if (y < previousY) {
@@ -594,7 +595,12 @@ function nrDeducationsWindow(windowIx) {
 }
 
 function updateWindowTopBottom(){
-  let deductionsSorted = deductions.sort().reverse();
+    
+  let deductionsSorted = deductions.sort(function(x,y){
+    var xp = Number(x.substring(0, x.indexOf(',')));
+    var yp = Number(y.substring(0, y.indexOf(',')));
+    return xp == yp ? 0 : xp < yp ? -1 : 1;
+  }).reverse();
   let previousY__ = mainCanvasHeight * cw;
   let curIndex = -1;
   for (const ded of deductionsSorted){
@@ -764,7 +770,6 @@ canvas3.addEventListener('click', function(e) {
   // click to change windows
   else {
     // isChecked=document.getElementById("switchValue").checked;
-
     const rect = canvas3.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
