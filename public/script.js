@@ -343,7 +343,7 @@ function reDrawMainCanvas() {
       x = Number(coordsArr[1]); y = Number(coordsArr[0]); color = coordsArr[2];
       x = x + (nrDeductions / 2) * cw;
 
-      if (y < bottomY && y > topY ) {
+      if (y < bottomY && y > topY - cw ) {
         ctx3.fillStyle = color
         ctx3.fillRect(x +1, y+1 , cw - 1, cw - 1)
     
