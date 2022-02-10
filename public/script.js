@@ -1,3 +1,5 @@
+
+
 let filledRectsCanvasTop = [];
 let filledRectsCanvasBottom = [];
 let filledRectsCanvas2 = [];
@@ -25,7 +27,6 @@ let minX = 10000;
 let maxX = 1;
 
 let currentWindowTop = 0;
-let currentWindowBotttom = 1000;
 
 // let mainCanvasWidth = 36
 let mainCanvasWidth = document.getElementById("mainX").value;
@@ -77,7 +78,7 @@ const ctx3 = canvas3.getContext('2d');
 // define widths, heigths, padding and cell size
 var p = 2;
 var cw = 15;
-
+let currentWindowBotttom = mainCanvasHeight * cw;
 // get colours
 let backgroundColor = document.getElementById("background-color").value
 let drawingColor = undefined;
@@ -199,7 +200,7 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
         color = coords[2];
          // dont draw outside canvas
         if (x_+1 < mainCanvasWidth * cw - nrDeductions * cw
-          && y_ < currentWindowBotttom + cw && y_ > currentWindowTop - cw
+          && y_ < currentWindowBotttom && y_ > currentWindowTop
           && x_ > 0) {
           new_coordsMain = [y_, x_,color,patternIX].toString();
           filledRectsCanvas3.push(new_coordsMain);
@@ -347,6 +348,7 @@ function reDrawMainCanvas() {
       }
   }
   }
+  
 }
 
 
