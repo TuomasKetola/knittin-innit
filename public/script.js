@@ -254,10 +254,8 @@ function reDrawMainCanvas(download_) {
     y_ = Number(coords[0]);
     x_ = Number(coords[1]);
     pIX = Number(coords[3])
-    console.log(coords)
     color = coords[2];
     if (pIX > pIXPrevious) {
-      console.log('here', pIX)
       addOn = 0
     }
     if (dedXs.includes(x_+addOn) && y_ <= deducationsDict[x_+addOn]){
@@ -855,8 +853,6 @@ canvas3.resizeAndExport = function(width, height){
   c.width = width;
   c.height = height;
   // draw our canvas to the new one
-  console.log(this.width, this.height)
-  console.log(c.width, c.height)
   c.getContext('2d').drawImage(this, 0,0,c.width + cw + 10, c.height + cw + 10, 0,0,width, height);
   // return the resized canvas dataURL
   return c.toDataURL();
