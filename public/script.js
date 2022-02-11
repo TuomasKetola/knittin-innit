@@ -78,7 +78,7 @@ const ctx3 = canvas3.getContext('2d');
 // define widths, heigths, padding and cell size
 var p = 2;
 var cw = 15;
-let currentWindowBotttom = mainCanvasHeight * cw;
+let currentWindowBotttom = mainCanvasHeight * cw + cw;
 // get colours
 let backgroundColor = document.getElementById("background-color").value
 let drawingColor = undefined;
@@ -200,7 +200,7 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
         color = coords[2];
          // dont draw outside canvas
         if (x_+1 < mainCanvasWidth * cw - nrDeductions * cw
-          && y_ < currentWindowBotttom && y_ > currentWindowTop
+          && y_ < currentWindowBotttom + cw && y_ > currentWindowTop
           && x_ > 0) {
           new_coordsMain = [y_, x_,color,patternIX].toString();
           filledRectsCanvas3.push(new_coordsMain);
@@ -847,10 +847,27 @@ colorSelectDiv.addEventListener('dblclick', function(e) {
   }
 })
 
+canvas3.resizeAndExport = function(width, height){
+  // create a new canvas
+  var c = document.createElement('canvas');
+  // set its width&height to the required ones
+  c.width = width;
+  c.height = height;
+  // draw our canvas to the new one
+  console.log(this.width, this.height)
+  console.log(c.width, c.height)
+  c.getContext('2d').drawImage(this, 0,0,c.width + cw + 10, c.height + cw + 10, 0,0,width, height);
+  // return the resized canvas dataURL
+  return c.toDataURL();
+  }
+
 
 function download() {
-  var dt = canvas3.toDataURL('image/jpeg');
-  this.href = dt;
+
+  var img = new Image();
+  img.src = canvas3.resizeAndExport(mainCanvasWidth * cw, mainCanvasHeight * cw);
+  // var dt = canvas3.toDataURL('image/jpeg');
+  this.href = img.src;
 };
 let downloadLnk  = document.getElementById('downloadLnk')
 downloadLnk.addEventListener('click', download, false);
