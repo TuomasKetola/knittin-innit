@@ -604,7 +604,7 @@ function updateWindowTopBottom(){
     var yp = Number(y.substring(0, y.indexOf(',')));
     return xp == yp ? 0 : xp < yp ? -1 : 1;
   }).reverse();
-  let previousY__ = mainCanvasHeight * cw;
+  let previousY__ = mainCanvasHeight * cw - cw;
   let curIndex = -1;
   for (const ded of deductionsSorted){
     coords = ded.split(','); y = Number(coords[0]); x = Number(coords[1]);
