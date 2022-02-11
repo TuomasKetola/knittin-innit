@@ -78,7 +78,7 @@ const ctx3 = canvas3.getContext('2d');
 // define widths, heigths, padding and cell size
 var p = 2;
 var cw = 15;
-let currentWindowBotttom = mainCanvasHeight * cw + cw;
+let currentWindowBotttom = mainCanvasHeight * cw - cw;
 // get colours
 let backgroundColor = document.getElementById("background-color").value
 let drawingColor = undefined;
@@ -214,7 +214,7 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
 }
 
 
-function reDrawMainCanvas() {
+function reDrawMainCanvas(download_) {
   // clear canvas
   ctx3.clearRect(0, 0, canvas3.width, canvas3.height);
 
@@ -310,7 +310,7 @@ function reDrawMainCanvas() {
   };
   
   // do window shading
-  if (deductions.length > 0){
+  if (deductions.length > 0 && !download_){
     updateWindowTopBottom();
     ctx3.fillStyle = "grey";
     ctx3.globalAlpha = 0.4;
@@ -864,10 +864,12 @@ canvas3.resizeAndExport = function(width, height){
 
 function download() {
 
+  reDrawMainCanvas('download');
   var img = new Image();
   img.src = canvas3.resizeAndExport(mainCanvasWidth * cw, mainCanvasHeight * cw);
   // var dt = canvas3.toDataURL('image/jpeg');
   this.href = img.src;
+  reDrawMainCanvas();
 };
 let downloadLnk  = document.getElementById('downloadLnk')
 downloadLnk.addEventListener('click', download, false);
