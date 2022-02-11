@@ -254,9 +254,10 @@ function reDrawMainCanvas(download_) {
     y_ = Number(coords[0]);
     x_ = Number(coords[1]);
     pIX = Number(coords[3])
-    
+    console.log(coords)
     color = coords[2];
     if (pIX > pIXPrevious) {
+      console.log('here', pIX)
       addOn = 0
     }
     if (dedXs.includes(x_+addOn) && y_ <= deducationsDict[x_+addOn]){
@@ -649,19 +650,19 @@ function changeChosenColor() {
   drawingColor = newColor;
   for (x = 0; x <= filledRectsCanvas3.length - 1; x++) {
     let coords = filledRectsCanvas3[x].split(',')
-    var rectColor = coords[2]; x_ = coords[1]; y_ = coords[0]
+    var rectColor = coords[2]; x_ = coords[1]; y_ = coords[0];pIX=coords[3]
     if (rectColor == oldColorHex) {
-      filledRectsCanvas3[x] = [y_, x_, newColor].toString();
+      filledRectsCanvas3[x] = [y_, x_, newColor, pIX].toString();
     }
   };
 
-  for (x = 0; x <= filledRectsCanvas3NoDeductions.length - 1; x++) {
-    let coords = filledRectsCanvas3NoDeductions[x].split(',')
-    var rectColor = coords[2]; x_ = coords[1]; y_ = coords[0]
-    if (rectColor == oldColorHex) {
-      filledRectsCanvas3NoDeductions[x] = [y_, x_, newColor].toString()
-    }
-  }
+  // for (x = 0; x <= filledRectsCanvas3NoDeductions.length - 1; x++) {
+  //   let coords = filledRectsCanvas3NoDeductions[x].split(',')
+  //   var rectColor = coords[2]; x_ = coords[1]; y_ = coords[0]
+  //   if (rectColor == oldColorHex) {
+  //     filledRectsCanvas3NoDeductions[x] = [y_, x_, newColor].toString()
+  //   }
+  // }
   reDrawMainCanvas();
 }
 
