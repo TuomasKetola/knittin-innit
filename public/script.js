@@ -109,7 +109,7 @@ function drawBoard(gridWidth, gridHeight, cellWidth, ctx, Ytop, Ybottom, nrDeduc
     ctx.fillStyle = "black";
     for (var x = 0  ; x <= cellWidth * gridWidth - (1 * cellWidth); x += cellWidth) {
       ctx.font = 10 +"px Arial";
-      ctx.fillText(x /cw + 1 , x + (cw / 3), gridHeight*cw + cw);
+      ctx.fillText(gridWidth - x /cw , x + (cw / 3), gridHeight*cw + cw);
     }
 
     for (var y = 0  ; y <= cellWidth * gridHeight - (1 * cellWidth); y += cellWidth) {
@@ -543,7 +543,7 @@ function focusOn(){
     for (const but of ["deduction", "drawOnMain"]){
       turnButtonOff(but);
     }
-    if (deduction){deduction=false};
+    if (addingDeduction){addingDeduction=false};
     if (drawMain){drawMain=false};
     // if (selectingColor){selectingColor=false}
   }
@@ -559,9 +559,10 @@ function drawOnMainOn(){
     for (const but of ["deduction", "focus"]){
       turnButtonOff(but)
     };
-    if (deduction){deduction=false};
+    if (addingDeduction){addingDeduction=false};
     if (focus){focus=false};
     // if (selectingColor){selectingColor=false}
+    console.log(addingDeduction)
   }
   else {turnButtonOff("drawOnMain")}
   reDrawMainCanvas();

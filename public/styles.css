@@ -1,6 +1,6 @@
 body { 
   margin: 10 auto; 
-  width: 900px; 
+  width: 1200px; 
 }
 canvas {
     position: absolute;
@@ -44,9 +44,11 @@ div{
   position: relative;
 }
 .template3 {
-  grid-column: 2 / 5;
+  grid-column: 2 / 12;
   grid-row: 2 / 12;
   height: 1200px;
+  /* width: 700px; */
+  /* border: 3px solid black; */
   position: relative;
 }
 
