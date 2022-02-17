@@ -25,6 +25,9 @@ let minY = 10000;
 let maxY = 1;
 let minX = 10000;
 let maxX = 1;
+let movingCoords = [];
+let belowMoveColor = undefined;
+let moveSelected = false;
 
 let currentWindowTop = 0;
 
@@ -43,6 +46,7 @@ let findDeduction = false;
 let addingDeduction = false;
 let focus = false;
 let drawMain = false;
+let movePattern_ = false;
 let deductionYs = [];
 
 let patternIX = 0;
@@ -133,7 +137,19 @@ function clickDrawToCanvas(canvas, event, cw, ctx, filledRects) {
 
   // make sure the drawing is on the canvas
   if (cx < drawingCanvasWidth * cw && cy < drawingCanvasHeight * cw) { 
-    
+    if (movePattern_ && !moveSelected){
+      ctx.fillStyle = '#ff007f';
+      
+      
+      var c = canvasTop.getContext('2d');
+      var p_ = c.getImageData(cx+1, cy+1, 1, 1).data; 
+      var hex = "#" + ("000000" + rgbToHex(p_[0], p_[1], p_[2])).slice(-6);
+      movingCoords = [cx,cy];
+      belowMoveColor = hex;
+      if (belowMoveColor == '#000000') {belowMoveColor = backgroundColor}
+      ctx.fillRect(cx+1, cy+1, cw-1, cw-1);
+      return
+    }
     if (find){
       
       const ix = filledRects.indexOf(new_coords);
@@ -170,6 +186,15 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
     coords = coordsString.split(',');
     Xs.push(Number(coords[0]));
     Ys.push(Number(coords[1]))
+  };
+  if (movePattern_) {
+    movePattern_ = false;
+    turnButtonOff('movePattern');
+    ctxTop.fillStyle = belowMoveColor;
+    ctxTop.fillRect(movingCoords[0]+1, movingCoords[1]+1, cw-1, cw-1);
+    ctxBottom.fillStyle = belowMoveColor;
+    ctxBottom.fillRect(movingCoords[0]+1, movingCoords[1]+1, cw-1, cw-1);
+    moveSelected = false;
   }
 
   patternIX += 1
@@ -446,7 +471,10 @@ function undoDraw() {
     ctxTop.fillRect(x_+1, y_+1, cw-1, cw-1)
 
     filledRectsCanvasBottom.pop()
-    filledRectsCanvasTop.pop()
+    filledRectsCanvasTop.pop();
+    
+    ctxBottom.fillRect(movingCoords[0]+1, movingCoords[1]+1, cw-1, cw-1)
+    ctxTop.fillRect(movingCoords[0]+1, movingCoords[1]+1, cw-1, cw-1)
   }
 }
 
@@ -457,22 +485,6 @@ function undoMain() {
   mainPatternSizes.pop();
   reDrawMainCanvas();
 }
-
-// function selectColorFromCanvas() {
-//   // button boolean
-//   selectingColor = !selectingColor;
-//   if (selectingColor){
-//     turnButtonOn("selectColor");
-//     for (const but of ["deduction", "drawOnMain", "focus"]){
-//       turnButtonOff(but);
-//       if (focus){focus=false};
-//       if (drawMain){drawMain=false};
-//       if (deduction){deduction=false}
-//     }
-//   }
-//   else {turnButtonOff("selectColor")}
-//   reDrawMainCanvas();
-// }
 
 function deducationBool() {
   // button boolean
@@ -561,8 +573,7 @@ function drawOnMainOn(){
     };
     if (addingDeduction){addingDeduction=false};
     if (focus){focus=false};
-    // if (selectingColor){selectingColor=false}
-    console.log(addingDeduction)
+
   }
   else {turnButtonOff("drawOnMain")}
   reDrawMainCanvas();
@@ -654,16 +665,25 @@ function changeChosenColor() {
       filledRectsCanvas3[x] = [y_, x_, newColor, pIX].toString();
     }
   };
-
-  // for (x = 0; x <= filledRectsCanvas3NoDeductions.length - 1; x++) {
-  //   let coords = filledRectsCanvas3NoDeductions[x].split(',')
-  //   var rectColor = coords[2]; x_ = coords[1]; y_ = coords[0]
-  //   if (rectColor == oldColorHex) {
-  //     filledRectsCanvas3NoDeductions[x] = [y_, x_, newColor].toString()
-  //   }
-  // }
   reDrawMainCanvas();
 }
+
+
+function movePattern() {
+  movePattern_ = !movePattern_;
+  if (movePattern_) {
+    turnButtonOn('movePattern');
+
+  }
+  else {
+    turnButtonOff('movePattern');
+    ctxTop.fillStyle = belowMoveColor;
+    ctxTop.fillRect(movingCoords[0]+1, movingCoords[1] + 1, cw-1, cw-1);
+    ctxBottom.fillStyle = belowMoveColor;
+    ctxBottom.fillRect(movingCoords[0]+1, movingCoords[1] + 1, cw-1, cw-1);
+  }
+}
+
 
 // listener for dragging
 canvasTop.addEventListener('mousedown', function(e) {
@@ -686,6 +706,9 @@ canvasTop.addEventListener('click', function(e) {
     if (drawingColor){
       clickDrawToCanvas(canvasBottom, e, cw, ctxBottom, filledRectsCanvasTop);
       clickDrawToCanvas(canvasTop, e, cw, ctxTop, filledRectsCanvasBottom);
+      if (movePattern_ && moveSelected) {
+        moveSelected = !moveSelected;
+      }
     }
   }
 })
@@ -771,9 +794,14 @@ canvas3.addEventListener('click', function(e) {
     }
   }
 
+  // click to move pattern
+  else if (movePattern_) {
+    drawFigToCanvas(canvas3, e, cw, ctx3, filledRectsCanvasTop);
+    return
+  }
+
   // click to change windows
   else {
-    // isChecked=document.getElementById("switchValue").checked;
     const rect = canvas3.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -878,6 +906,7 @@ downloadLnk.addEventListener('click', download, false);
 drawBoard(smallCanvasWidth, smallCanvasHeight, cw, ctxBottom);
 drawBoard(mainCanvasWidth, mainCanvasHeight, cw, ctx3)
 reDrawMainCanvas();
+
 // Get the modal
 var modal = document.getElementById("manualModal");
 

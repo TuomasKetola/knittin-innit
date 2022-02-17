@@ -47,8 +47,6 @@ div{
   grid-column: 2 / 12;
   grid-row: 2 / 12;
   height: 1200px;
-  /* width: 700px; */
-  /* border: 3px solid black; */
   position: relative;
 }
 
@@ -138,7 +136,6 @@ div.float-child > float-child {
 .manual-text{
   float:left;
   width:35%
-  /* border: 2px solid red; */
 }
 .videoDiv{
   float:right;
