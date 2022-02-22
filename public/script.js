@@ -420,6 +420,21 @@ function changeMainCanvasSizes(input_) {
       smallCanvasSelect.appendChild(opt);
     }
   };
+  if (mainCanvasWidth / 2 > 21) {
+    div1.style.width = cw * mainCanvasWidth / 2 + p + cw + 'px'
+    div3.style.width = cw * mainCanvasWidth + p + cw + 'px'
+    resizeCanvas(div1, canvasTop)
+    resizeCanvas(div1, canvasBottom)
+    resizeCanvas(div3, canvas3)
+  };
+  if (mainCanvasWidth / 2 < 21) {
+    div1.style.width = '390px'
+    resizeCanvas(div1, canvasTop)
+    resizeCanvas(div1, canvasBottom)
+    div3.style.width = '780px'
+    resizeCanvas(div3, canvas3)
+    
+  };
   changeDrawingCanvasSizes();
   }
 
