@@ -30,7 +30,7 @@ div{
 .div3Options{
   grid-column: 3 / 14;
   grid-row: 1 / 2;
-  height:100px
+  height:210px
 }
 .template1 {
   grid-column: 1 / 2;
@@ -88,8 +88,8 @@ div.float-child > float-child {
   background-color:white
 }
 
- /* The Modal (background) */
- .modal {
+ /* The Modal (background) for manual*/
+ .modalMan {
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
   z-index: 3; /* Sit on top */
@@ -102,8 +102,8 @@ div.float-child > float-child {
   background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 }
 
-/* Modal Content/Box */
-.modal-content {
+/* Modal Content/Box for manual*/
+.modalMan-content {
   background-color: #fefefe;
   margin: 15% auto; /* 15% from the top and centered */
   padding: 20px;
@@ -152,4 +152,31 @@ div.float-child > float-child {
 .manual-button{
   width: 400px;
   height:50px
+}
+.login-button{
+  width: 100px;
+  height:50px;
+  float: left;
+}
+ /* The Modal (background) for log in */
+ .modalLogin {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 3; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box for login */
+.modalLogin-content {
+  background-color: #fefefe;
+  margin: 10% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 50%; /* Could be more or less, depending on screen size */
 }

@@ -68,3 +68,5 @@ node_modules/
 .DS_store
 package-lock.json
 package.json
+
+neuleesi-*.json

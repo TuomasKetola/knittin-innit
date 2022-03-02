@@ -5,31 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="styles.css">
     <title>Villapaidan Kaarrokkeen Suunittelija</title>
-
+    <link rel="shortcut icon" href="#" />
   </head>
   <body>
     
     <h1>Villapaidan Kaarrokkeen Suunittelija</h1>
-    
-        <p style="width:700px">
+    <div>
+        <p style="width:700px;float:left">
             <b>Tervetuloa suunittelemaan oma kaarrokekuviosi!</b> Neuleesi ohjelman ajatuksena on tehdä kuvioiden
             suunittelusta mahdollisimman hauskaa ja helppoa, mutta silti taata että kuvioiden
             toistuvuus säilyy. Aloita lukemalla <b>käyttöohjeet</b> ja katsomalla niihin kuuluvat videot
             päänsäryltä säästymiseksi.
         </p>
+    </div>
+        <button id="logInButton" class="login-button" style="visibility:visible">Kirjaudu Sisään</button>
+        <button id="logOutButton" class="login-button" style="visibility:hidden">Kirjaudu Ulos</button>
         <p style="width:700px">
             Ohjelma on prototyyppivaiheessa joten kaikki palaute ja ideat ovat 
             erittäin tervetulleita. Ole yhteydessä sähköpostitse: <a href="mailto:neuleesi@gmail.com">neuleesi@gmail.com</a>, facebookissa: <a href="https://www.facebook.com/groups/694431491693138">https://www.facebook.com/groups/694431491693138</a> ja/tai Githubissa: <a href="https://github.com/TuomasKetola/knittin-innit">https://github.com/knittin-innit</a>
         </p>
+    <!-- log in modal -->
+    <div id="loginModal" class='modalLogin'>
+        <div class="modalLogin-content">
+            <span class="close" id="closeLogInModal">&times;</span>
+            <h1>Log in</h1>
+                <div>
+                    <form onsubmit="return false">
+                        <label for="user-name">Username / Email</label>
+                        <input type="text" id="username" name="username"><br><br>
+                        <label for="Password">First name:</label>
+                        <input type="password" id="password" name="password"><br><br>
+                    </form>
+                </div>
+                <div>
+                    <button id="signin">Sign-In</button>
+                </div>
+                <div>
+                    <button id="signup">Luo Tili</button>
+                </div>
+                <div style="width:500px">
+                    <form onsubmit="return false">
+                        <input type="text" id="loginerror" name="loginerror" style="border:0px;width:500px" ><br><br>
+                    </form>
+                </div>
+                
+        </div>
+        
+    </div>
+    
     <!-- manual button -->
     <button id="manualButton" class="manual-button">Käyttöohjeet</button>
-    
     <!-- manual modal -->
-    <div id="manualModal" class="modal">
+    <div id="manualModal" class="modalMan">
 
         <!-- Modal content -->
-        <div class="modal-content">
-          <span class="close">&times;</span>
+        <div class="modalMan-content">
+          <span class="close" id="closeManualModal">&times;</span>
           <h1>Käyttöohjeet</h1>
           <div class="manual-parent">
             <h2>Ennen piirtämisen aloitusta määrittele kuvion koko ja vähennykset</h2>
@@ -274,19 +305,26 @@
         <div id=div3Options class="div3Options">
             <h2>Pääkuvion Asetukset</h2>
             <div>
+                <label for="jumperName">Kuvion Nimi</label><br>
+                <input type="text" id="jumperName" name="jumperName" value="hyvaNimi" onchange="changeName()"><br>
+            </div>
+            <div>
                 <form onsubmit="return false">
                     <label for="mainX">Pääkuvion silmukkamäärä</label><br>
                     <input type="number" id="mainX" name="mainX" value="32" onchange="changeMainX()"><br>
                     <label for="mainY">Pääkuvion rivimäärä</label><br>
                     <input type="number" id="mainY" name="mainY" value="42" onchange="changeMainY()"><br>
-                    </form> 
+                </form> 
             </div>
+            <!-- <label for="jumperName">Kuvion Nimi</label><br> -->
+            <!-- <input type="number" id="jumperName" name="jumperName" value="42" onchange="changeName()"><br> -->
             <div>
                 <button id="undoMain" onclick="undoMain()">Takaisin</button>
                 <button id="deduction" onclick="deducationBool()">Kavennus</button>
                 <button id="focus" onclick="focusOn()">Tarkenna</button>
                 <button id="drawOnMain" onclick="drawOnMainOn()">Värita Suoraan</button>
                 <button id="downloadLinkButton"><a id="downloadLnk" download="YourFileName.jpg">Lataa Kuvio</a>
+                <button id="saveJumper">Tallenna Kuvio</button>
                 </button>
             </div>
         </div>
@@ -299,38 +337,8 @@
         </div>
       </div>      
  
-    <script src="script.js?v=1"></script>
-
-    <script type="module">
-                 // Import the functions you need from the SDKs you need
-        // console.log('here')
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.5/firebase-app.js";
-      
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.5/firebase-analytics.js";
-      
-        // TODO: Add SDKs for Firebase products that you want to use
-        // https://firebase.google.com/docs/web/setup#available-libraries
-      
-      
-        // Your web app's Firebase configuration
-        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-      
-        const firebaseConfig = {      
-          apiKey: "AIzaSyC821QK14SwRBRt4V39AMkADnl5Qaue5pE", 
-          authDomain: "neuleesi.firebaseapp.com",      
-          projectId: "neuleesi",      
-          storageBucket: "neuleesi.appspot.com",      
-          messagingSenderId: "635210421804",      
-          appId: "1:635210421804:web:a5b4e43116e6868a6fa389",      
-          measurementId: "G-7BTE9B5S2H"     
-        };
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-    
-      
-      
-
+    <script type="module" src="firebaseThings.js">
     </script>
+    <script src="script_refactor.js?v=1"></script>
   </body>
 </html>
