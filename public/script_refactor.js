@@ -61,8 +61,8 @@ let Jumper = {
   id_: '',
   createdAt: '',
   colors: [],
-  // deductions: ['482,422', '482,47', '197,392', '197,137'],
-  deductions: [],
+  deductions: ['482,422', '482,47', '197,392', '197,137'],
+  // deductions: [],
   filledRectsCanvas3: [],
   // mainPatternHeight: mainCanvasHeight,
   // mainPatternWidth: mainCanvasHeight,
@@ -218,7 +218,7 @@ function clickDrawToCanvas(canvas, event, cw, ctx, filledRects) {
   let Xs = [];
   let Ys = [];
   for (const coordsString of filledRects){
-    coords = coordsString.split(',');
+    let coords = coordsString.split(',');
     Xs.push(Number(coords[0]));
     Ys.push(Number(coords[1]))
   }
@@ -234,7 +234,7 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
   let Xs = [];
   let Ys = [];
   for (const coordsString of filledRects){
-    coords = coordsString.split(',');
+    let coords = coordsString.split(',');
     Xs.push(Number(coords[0]));
     Ys.push(Number(coords[1]))
   };
@@ -269,16 +269,16 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
   if (mouseX > 0) { // make sure on the right canvas
     for(let i = 0; i <= nrReps - 1; i++) {  
       for (const x of sortedFilledRects) {
-        coords = x.split(',');
-        y_ = Number(coords[1]) - minY + mouseY - (mouseToDragY - minY);
-        x_ = Number(coords[0]) + i * shapeSize * cw;
+        let coords = x.split(',');
+        let y_ = Number(coords[1]) - minY + mouseY - (mouseToDragY - minY);
+        let x_= Number(coords[0]) + i * shapeSize * cw;
         
-        color = coords[2];
+        let color = coords[2];
          // dont draw outside canvas
         if (x_+1 < mainCanvasWidth * cw - nrDeductions * cw
           && y_ < currentWindowBotttom + cw && y_ > currentWindowTop
           && x_ > 0) {
-          new_coordsMain = [y_, x_,color,patternIX].toString();
+          let new_coordsMain = [y_, x_,color,patternIX].toString();
           Jumper.filledRectsCanvas3.push(new_coordsMain);
           patternSize += 1;
         }
@@ -303,8 +303,8 @@ function reDrawMainCanvas(download_) {
   
   // empty pixels after deductions
   for (const ded of Jumper.deductions) {
-    coords = ded.split(',');
-    deductionY = Number(coords[0]); deductionX = Number(coords[1]);
+    let coords = ded.split(',');
+    let deductionY = Number(coords[0]); let deductionX = Number(coords[1]);
     ctx3.clearRect(deductionX+1, 0, cw-1, deductionY+cw)
     }
   
@@ -314,8 +314,8 @@ function reDrawMainCanvas(download_) {
   var deducationsDict = {};
   var pIXPrevious = 0;
   for (const coordString of Jumper.deductions) {
-    coordsDeduction = coordString.split(',');
-    coordsDedX = Number(coordsDeduction[1]); coordsDedY = Number(coordsDeduction[0]);
+    let coordsDeduction = coordString.split(',');
+    let coordsDedX = Number(coordsDeduction[1]); let coordsDedY = Number(coordsDeduction[0]);
     deducationsDict[coordsDedX] = coordsDedY
     dedXs.push(coordsDedX)
   }
@@ -326,11 +326,11 @@ function reDrawMainCanvas(download_) {
 
   let filledRectsCanvas3NoDeductions = [];
   while (coordIx < Jumper.filledRectsCanvas3.length) {
-    coords = Jumper.filledRectsCanvas3[coordIx].split(',')
-    y_ = Number(coords[0]);
-    x_ = Number(coords[1]);
-    pIX = Number(coords[3])
-    color = coords[2];
+    let coords = Jumper.filledRectsCanvas3[coordIx].split(',')
+    let y_ = Number(coords[0]);
+    let x_ = Number(coords[1]);
+    let pIX = Number(coords[3])
+    let color = coords[2];
     if (pIX > pIXPrevious) {
       addOn = 0
     }
@@ -355,17 +355,19 @@ function reDrawMainCanvas(download_) {
   let bottomY = previousY
   let deductionIndex = -1
   let nrDeductions = 0;
+  let topY = 0;
+  let y = 0;
   for (var ix = 0  ; ix <= deductionsReverse.length - 1; ix ++)  {
-    dedCoords = deductionsReverse[ix].split(',');
+    let dedCoords = deductionsReverse[ix].split(',');
     y = Number(dedCoords[0]);
-    x = Number(dedCoords[1]);
+    // let x = Number(dedCoords[1]);
     if (y < previousY) {
       deductionIndex += 1
     }
     if (deductionIndex == currentWindowIndex) {
       topY = y + cw;
       if (deductionIndex != 0) {
-        dedCoordsPrevious = deductionsReverse[ix - 1].split(',');
+        let dedCoordsPrevious = deductionsReverse[ix - 1].split(',');
         bottomY = Number(dedCoordsPrevious[0]) + cw;
       }
       break
@@ -392,9 +394,9 @@ function reDrawMainCanvas(download_) {
 
   // deductions
   for (const x of Jumper.deductions) {
-    coords = x.split(',');   
-    cy_ = Number(coords[0]);
-    cx_ = Number(coords[1]);
+    let coords = x.split(',');   
+    let cy_ = Number(coords[0]);
+    let cx_ = Number(coords[1]);
     ctx3.font = cw +"px Arial";
     ctx3.fillStyle = "black";
     ctx3.fillText("V", cx_ + 3 - cw, cy_ + cw - 1);
@@ -427,6 +429,11 @@ function changeCanvasBackground(ctx, color, height, width) {
   ctx.fillStyle = color;
   ctx.fillRect(p, p, width * cw + p, height*cw +p);
 }
+
+let changeBackgroundElem = document.getElementById('background-color')
+changeBackgroundElem.addEventListener('change', function(e) {
+  changeBackground();
+})
 
 function changeBackground() {
   // change baclground function for html
@@ -484,6 +491,11 @@ function changeMainCanvasSizes(input_) {
   changeDrawingCanvasSizes();
   }
 
+let drawingDimsElem = document.getElementById('drawingDims')
+drawingDimsElem.addEventListener('change', function(e) {
+  changeDrawingCanvasSizes()
+})
+
 function changeDrawingCanvasSizes() {
   // change canvas sizes for the drawing canvas
   var drawingX = document.getElementById("drawingDims").value;
@@ -539,6 +551,11 @@ function undoDraw() {
   }
 }
 
+let undoMainButton = document.getElementById('undoMain')
+undoMainButton.addEventListener('change', function(e) {
+  undoMain()
+})
+
 function undoMain() {
   // button function to undo main
   lastSize = mainPatternSizes[mainPatternSizes.length - 1];
@@ -546,6 +563,11 @@ function undoMain() {
   mainPatternSizes.pop();
   reDrawMainCanvas();
 }
+
+let deductionButton  = document.getElementById('deduction')
+deductionButton.addEventListener('click', function(e) {
+  deducationBool()
+})
 
 function deducationBool() {
   // button boolean
@@ -569,26 +591,37 @@ function rgbToHex(r, g, b) {
   return ((r << 16) | (g << 8) | b).toString(16);
 }
 
+
+let mainXelem = document.getElementById('mainX')
+mainXelem.addEventListener('change', function(e) {
+  changeMainX();
+})
+
 function changeMainX() {
   // button function change the X axis of main canvas
-  mainX = document.getElementById("mainX").value;
+  let mainX = document.getElementById("mainX").value;
   mainCanvasWidth = mainX;
   Jumper.xpixels = mainX;
   changeMainCanvasSizes();
   reDrawMainCanvas()
 }
 
+let mainYelem = document.getElementById('mainY')
+mainYelem.addEventListener('change', function(e) {
+  changeMainY();
+})
 function changeMainY() {
   // button function change the Y axis of main canvas
-  mainY = document.getElementById("mainY").value;
+  let mainY = document.getElementById("mainY").value;
   mainCanvasHeight = mainY;
   Jumper.ypixels = mainY
   reDrawMainCanvas();
 }
 
-function changeSmallY() {
+let changeSmallYelem = document.getElementById('smallY')
+changeSmallYelem.addEventListener('change', function(e) {
   // button function change the Y axis of drawing canvas
-  smallY = document.getElementById("smallY").value;
+  let smallY = document.getElementById("smallY").value;
   smallCanvasHeight = smallY;
   drawingCanvasHeight = smallCanvasHeight
   ctxBottom.clearRect(0, 0, canvasBottom.width, canvasBottom.height);
@@ -597,7 +630,7 @@ function changeSmallY() {
   filledRectsCanvasTop = []
   drawBoard(smallCanvasWidth, smallCanvasHeight, cw, ctxBottom);
   drawBoard(smallCanvasWidth, smallCanvasHeight, cw, ctxTop);
-}
+})
 
 function turnButtonOn(buttonId, color){
   var property = document.getElementById(buttonId);
@@ -609,6 +642,11 @@ function turnButtonOff(buttonId){
   var property = document.getElementById(buttonId);
   property.style.backgroundColor = "white"
 }
+
+let focusButton = document.getElementById('focus');
+focusButton.addEventListener('click', function(e) {
+  focusOn();
+})
 
 function focusOn(){
   // focus button / boolean
@@ -626,6 +664,10 @@ function focusOn(){
   reDrawMainCanvas();
 }
 
+let drawMainButton = document.getElementById('drawOnMain')
+drawMainButton.addEventListener('click', function(e) {
+  drawOnMainOn()
+})
 function drawOnMainOn(){
   // drawing directly to main on
   drawMain = !drawMain;
@@ -645,16 +687,16 @@ function drawOnMainOn(){
 function nrDeducationsWindow(windowIx) {  
   // give the number of deductions in a given window
   let currentIx = -1;
-  nrDeductions = 0;
-  previousY = mainCanvasHeight * cw;
+  let nrDeductions = 0;
+  let previousY = mainCanvasHeight * cw;
   if (currentWindowIndex == 0) {
     return 0
   }
   
   let deductionsReverse = Jumper.deductionsSortReverse()
   for (const deduction of deductionsReverse) {
-    coords = deduction.split(',')
-    y = Number(coords[0]); x = Number(coords[1]);
+    let coords = deduction.split(',')
+    let y = Number(coords[0]); let x = Number(coords[1]);
     if (y < previousY) {
       currentIx += 1;
       if (currentIx == windowIx) {
@@ -674,7 +716,7 @@ function updateWindowTopBottom(){
   let previousY__ = mainCanvasHeight * cw - cw;
   let curIndex = -1;
   for (const ded of deductionsSorted){
-    coords = ded.split(','); y = Number(coords[0]); x = Number(coords[1]);
+    let coords = ded.split(','); let y = Number(coords[0]); let x = Number(coords[1]);
     if (y<previousY__) {
       curIndex += 1;
     }
@@ -691,21 +733,25 @@ function updateWindowTopBottom(){
 }
 
 // Add color
-function addColor() {
+let addColorElem = document.getElementById('add-color');
+addColorElem.addEventListener('change', function(e) {
   currentColorId += 1;
   let newColor= document.getElementById("add-color").value;
-  newDiv = document.createElement("div");
+  let newDiv = document.createElement("div");
   newDiv.style.background = newColor;
   newDiv.style.border = "1px solid black";
   newDiv.id = "color-"+String(currentColorId);
   newDiv.className = "float-child";
   document.getElementById("drawing-color-divs").appendChild(newDiv);
   drawingColor = newColor;
-
   Jumper.colors.push(newColor)
-}
+})
 
 
+let changeChosenColorElem = document.getElementById('hidden-color-change')
+changeChosenColorElem.addEventListener('change', function(e) {
+  changeChosenColor();
+})
 function changeChosenColor() {
   let newColor = document.getElementById("hidden-color-change").value
   let curDiv = document.getElementById(currentColorDivId)
@@ -715,7 +761,7 @@ function changeChosenColor() {
   
   curDiv.style.backgroundColor = newColor;
   drawingColor = newColor;
-  for (x = 0; x <= Jumper.filledRectsCanvas3.length - 1; x++) {
+  for (let x = 0; x <= Jumper.filledRectsCanvas3.length - 1; x++) {
     let coords = Jumper.filledRectsCanvas3[x].split(',')
     var rectColor = coords[2]; x_ = coords[1]; y_ = coords[0];pIX=coords[3]
     if (rectColor == oldColorHex) {
@@ -741,6 +787,10 @@ function movePattern() {
   }
 }
 
+let nameElem = document.getElementById('jumperName')
+nameElem.addEventListener('change', function(e) {
+  changeName();
+})
 function changeName() {
   let nameElem = document.getElementById('jumperName');
   Jumper.name = nameElem.value;
@@ -782,7 +832,7 @@ canvasTop.addEventListener('click', function(e) {
 // })
 // SOLUTION:
 // ################
-dragOverHandler = function(e) {
+let dragOverHandler = function(e) {
   e.preventDefault();
   return false;
 }
@@ -873,11 +923,13 @@ canvas3.addEventListener('click', function(e) {
     // deductionsReverse = deductions.sort().reverse();
     let deductionsReverse = Jumper.deductionsSortReverse()
     let deductionIndex = -1
+    let topY = 0;
+    let bottomY = Jumper.ypixels * cw ;
     for (var ix = 0  ; ix <= deductionsReverse.length - 1; ix ++)  {
             
-      dedCoords = deductionsReverse[ix].split(',');
-      y_ = Number(dedCoords[0]);
-      x_ = Number(dedCoords[1]);
+      let dedCoords = deductionsReverse[ix].split(',');
+      let y_ = Number(dedCoords[0]);
+      let x_ = Number(dedCoords[1]);
       if (y_ < previousY) {
         deductionIndex += 1; 
       }   
@@ -919,7 +971,7 @@ colorSelectDiv.addEventListener('click', function(e) {
     var rgb = e.target.style.backgroundColor.split("(")[1].split(")")[0].split(',');
     var hex = "#" + ("000000" + rgbToHex(rgb[0], rgb[1], rgb[2])).slice(-6);
     drawingColor = hex;
-    curColorBut = document.getElementById('add-color');
+    let curColorBut = document.getElementById('add-color');
     curColorBut.value = drawingColor  
   }
 })
@@ -997,3 +1049,4 @@ window.onclick = function(event) {
     modalLogin.style.display = "none";
   }
 }
+console.log(db)

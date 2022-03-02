@@ -262,17 +262,17 @@
         <div id=generalOptions>
             <h2>Värivalinnat</h2>
             <div>
-                <input type="color" id="add-color" onchange="addColor()" 
+                <input type="color" id="add-color"
                 name="add-color" value="#FFFFFF">
                 <label for="background-color">Lisää Väri</label>
-                <input type="color" id="background-color" onchange="changeBackground()" 
+                <input type="color" id="background-color" 
                 name="background-color" value="#FFFFFF">
                 <label for="background-color">Taustaväri</label>
             </div>
             <div>
                 Valitut Värit
                 <div id="drawing-color-divs" class="float-container">
-                    <input type="color" id="hidden-color-change" tabindex=-1 class="hidden" onchange="changeChosenColor()">
+                    <input type="color" id="hidden-color-change" tabindex=-1 class="hidden">
                 </div>
             </div>
         </div>
@@ -281,12 +281,12 @@
             <div>
                 <form onsubmit="return false">
                     <label for="smallY">Pienen kuvion rivimäärä</label><br>
-                    <input type="number" id="smallY" name="smallY" value="12" onchange="changeSmallY()">
+                    <input type="number" id="smallY" name="smallY" value="12">
                   </form> 
             </div>
             <div>
                 <label for="drawingDims">Toistuvan kuvion silmukkamäärä</label>
-                <select name="drawingDims" id="drawingDims" onchange="changeDrawingCanvasSizes()">
+                <select name="drawingDims" id="drawingDims">
                     <option value="18" >18</option>
                     <option value="12">12</option>
                     <option value="9">9</option>
@@ -306,23 +306,23 @@
             <h2>Pääkuvion Asetukset</h2>
             <div>
                 <label for="jumperName">Kuvion Nimi</label><br>
-                <input type="text" id="jumperName" name="jumperName" value="hyvaNimi" onchange="changeName()"><br>
+                <input type="text" id="jumperName" name="jumperName" value="hyvaNimi"><br>
             </div>
             <div>
                 <form onsubmit="return false">
                     <label for="mainX">Pääkuvion silmukkamäärä</label><br>
-                    <input type="number" id="mainX" name="mainX" value="32" onchange="changeMainX()"><br>
+                    <input type="number" id="mainX" name="mainX" value="32"><br>
                     <label for="mainY">Pääkuvion rivimäärä</label><br>
-                    <input type="number" id="mainY" name="mainY" value="42" onchange="changeMainY()"><br>
+                    <input type="number" id="mainY" name="mainY" value="42"><br>
                 </form> 
             </div>
             <!-- <label for="jumperName">Kuvion Nimi</label><br> -->
             <!-- <input type="number" id="jumperName" name="jumperName" value="42" onchange="changeName()"><br> -->
             <div>
-                <button id="undoMain" onclick="undoMain()">Takaisin</button>
-                <button id="deduction" onclick="deducationBool()">Kavennus</button>
-                <button id="focus" onclick="focusOn()">Tarkenna</button>
-                <button id="drawOnMain" onclick="drawOnMainOn()">Värita Suoraan</button>
+                <button id="undoMain">Takaisin</button>
+                <button id="deduction">Kavennus</button>
+                <button id="focus">Tarkenna</button>
+                <button id="drawOnMain">Värita Suoraan</button>
                 <button id="downloadLinkButton"><a id="downloadLnk" download="YourFileName.jpg">Lataa Kuvio</a>
                 <button id="saveJumper">Tallenna Kuvio</button>
                 </button>
@@ -337,8 +337,9 @@
         </div>
       </div>      
  
+      <script type="module" src="script_refactor.js?v=1"></script>
     <script type="module" src="firebaseThings.js">
     </script>
-    <script src="script_refactor.js?v=1"></script>
+    
   </body>
 </html>
