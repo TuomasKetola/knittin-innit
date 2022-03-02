@@ -4,9 +4,9 @@ import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.5/firebase-
 
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.5/firebase-auth.js";
 
-import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.5/firebase-firestore.js";
+import { getFirestore, doc, addDoc, collection } from "https://www.gstatic.com/firebasejs/9.6.5/firebase-firestore.js";
 
-export {db}
+export {db, auth, user, doc, addDoc, collection}
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -120,6 +120,7 @@ signOutButton.onclick = function() {
 }
 
 const auth = getAuth();
+let user = undefined
 onAuthStateChanged(auth, (user) => {
   if (user) {
     // User is signed in, see docs for a list of available properties

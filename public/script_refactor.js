@@ -1,4 +1,4 @@
-import {db} from './firebaseThings.js'
+import {db, auth, addDoc, collection} from './firebaseThings.js'
 let filledRectsCanvasTop = [];
 let filledRectsCanvasBottom = [];
 let filledRectsCanvas2 = [];
@@ -61,8 +61,8 @@ let Jumper = {
   id_: '',
   createdAt: '',
   colors: [],
-  deductions: ['482,422', '482,47', '197,392', '197,137'],
-  // deductions: [],
+  // deductions: ['482,422', '482,47', '197,392', '197,137'],
+  deductions: [],
   filledRectsCanvas3: [],
   // mainPatternHeight: mainCanvasHeight,
   // mainPatternWidth: mainCanvasHeight,
@@ -1040,13 +1040,79 @@ btn.onclick = function() {
 span.onclick = function() {
   modalLogin.style.display = "none";
 }
+
+// get the modal for the exsisting patterns
+
+var modalExs = document.getElementById("existingDesignsModal");
+var btn = document.getElementById("exsistingButton");
+var span = document.getElementById("closeExistingDesignModal");
+btn.onclick = function() {
+  if (auth.currentUser) {
+    modalExs.style.display = "block";
+  }
+  else {
+    console.log('need to sign in to see previous models')
+  }
+}
+span.onclick = function() {
+  modalExs.style.display = "none";
+}
+
+
 window.onclick = function(event) {
   if (event.target == modalMan) {
     modalMan.style.display = "none";
-    console.log('here')
+    // console.log('here')
   }
   else if (event.target == modalLogin) {
     modalLogin.style.display = "none";
   }
+  else if (event.target == modalExs) {
+    modalExs.style.display = "none";
+  }
+
 }
-console.log(db)
+
+
+
+// saving and signing in things:
+let saveButton = document.getElementById('saveJumper')
+saveButton.addEventListener('click', function(e) {
+  
+  if (auth.currentUser) { 
+    let uid  = auth.currentUser.uid;
+    console.log('here',uid, Jumper.name);
+    const docRef = addDoc(collection(db, "jumpers"), {
+      name: Jumper.name,
+      id_: Jumper.id_,
+      createdAt: Jumper.createdAt,
+      colors: Jumper.colors,
+      deductions: Jumper.deductions,
+      filledRectsCanvas3: Jumper.filledRectsCanvas3,
+      ypixels: Jumper.ypixels,
+      xpixels: Jumper.xpixels,
+      windows: Jumper.windows
+    })
+  }
+  else {
+    console.log('you need to sign in to save')
+  }
+})
+
+// let Jumper = {
+//   name: '',
+//   id_: '',
+//   createdAt: '',
+//   colors: [],
+//   // deductions: ['482,422', '482,47', '197,392', '197,137'],
+//   deductions: [],
+//   filledRectsCanvas3: [],
+//   // mainPatternHeight: mainCanvasHeight,
+//   // mainPatternWidth: mainCanvasHeight,
+//   ypixels: mainCanvasHeight,
+//   xpixels: mainCanvasWidth,
+  
+
+// console.log(db)
+// console.log(auth)
+// console.log(user)
