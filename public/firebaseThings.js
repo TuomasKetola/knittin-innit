@@ -2,11 +2,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.5/firebase
       
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.5/firebase-analytics.js";
 
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.5/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.6.5/firebase-auth.js";
 
-import { getFirestore, doc, addDoc, collection } from "https://www.gstatic.com/firebasejs/9.6.5/firebase-firestore.js";
+import { getFirestore, doc, addDoc, collection, getDocs, getDoc,query, where, setDoc, orderBy } from "https://www.gstatic.com/firebasejs/9.6.5/firebase-firestore.js";
 
-export {db, auth, user, doc, addDoc, collection}
+export {db, auth, user, doc, addDoc, collection, getDocs, query, where, getDoc, setDoc, orderBy}
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -37,6 +37,7 @@ let signoutModalButton = document.getElementById('logOutButton')
 let signUpButton = document.getElementById("signup");
 let userNameField = document.getElementById("username");
 let passwordField = document.getElementById("password");
+
 signUpButton.onclick = function() {
     let userName = userNameField.value
     let password = passwordField.value
@@ -60,16 +61,16 @@ signUpButton.onclick = function() {
                 
                 // weak password
                 if (errorCode == 'auth/weak-password') {
-                    errorField.value  = 'Salasanan on oltava vahintaan 6 merkkia pitka'
+                    errorField.value  = 'Salasanan on oltava vähintään 6 merkkiä pitkä'
                 }
                 // invalid email
                 else if (errorCode == 'auth/invalid-email') {
-                    errorField.value  = 'Sahkoposti ei ole mahdollinen'
+                    errorField.value  = 'Sähköposti ei ole mahdollinen'
                     // console.log('yay')
                 }
                 // email already in use
                 else if (errorCode == 'auth/email-already-in-use') {
-                    errorField.value  = 'Sahkoposti on jo kaytossa'
+                    errorField.value  = 'Sähköposti on jo käytössä'
                     // console.log('yay')
                 }
                 // ..
@@ -99,8 +100,13 @@ signInButton.onclick = function() {
                 const errorMessage = error.message;
                 let errorField = document.getElementById('loginerror')
                 if (errorCode == 'auth/wrong-password') {
-                    errorField.value  = 'Vaara Salasana'
+                    errorField.value  = 'Väärä Salasana'
                 }
+                else if (errorCode =='auth/user-not-found') {
+                    errorField.value  = 'Kyseistä käyttäjänimeä ei löydy'
+                }
+
+                console.log(errorCode, errorMessage)
             });
     }   
 }
@@ -111,8 +117,8 @@ signOutButton.onclick = function() {
         // Sign-out successful.
         signoutModalButton.style.visibility = 'hidden'
         signinModalButton.style.visibility = 'visible'
-        console.log('successfully signed out')
-        console.log(uid)
+        // console.log('successfully signed out')
+        // console.log(uid)
       }).catch((error) => {
           console.log(error.code, error.message)
         // An error happened.

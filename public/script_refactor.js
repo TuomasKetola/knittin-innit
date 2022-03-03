@@ -1,4 +1,4 @@
-import {db, auth, addDoc, collection} from './firebaseThings.js'
+import {db, auth, addDoc, collection, doc, getDocs,getDoc, query, where, setDoc, orderBy} from './firebaseThings.js'
 let filledRectsCanvasTop = [];
 let filledRectsCanvasBottom = [];
 let filledRectsCanvas2 = [];
@@ -16,7 +16,7 @@ let currentWindowIndex = 0;
 let windowTop = 0;
 
 let currentColorId = 0;
-let currentColorDivId = undefined;
+var currentColorDivId = undefined;
 
 let mouseToDragY = 1;
 let mouseDown = false;
@@ -54,9 +54,11 @@ let isChecked = false;
 
 
 
+let backgroundColor = document.getElementById("background-color").value
 
 // Refactring of javascript:
 let Jumper = {
+  creator: '',
   name: '',
   id_: '',
   createdAt: '',
@@ -64,6 +66,7 @@ let Jumper = {
   // deductions: ['482,422', '482,47', '197,392', '197,137'],
   deductions: [],
   filledRectsCanvas3: [],
+  backgroundColor:backgroundColor,
   // mainPatternHeight: mainCanvasHeight,
   // mainPatternWidth: mainCanvasHeight,
   ypixels: mainCanvasHeight,
@@ -135,7 +138,7 @@ var p = 2;
 var cw = 15;
 let currentWindowBotttom = mainCanvasHeight * cw - cw;
 // get colours
-let backgroundColor = document.getElementById("background-color").value
+
 let drawingColor = undefined;
 
 function drawBoard(gridWidth, gridHeight, cellWidth, ctx, Ytop, Ybottom, nrDeductions){
@@ -197,7 +200,7 @@ function clickDrawToCanvas(canvas, event, cw, ctx, filledRects) {
       var hex = "#" + ("000000" + rgbToHex(p_[0], p_[1], p_[2])).slice(-6);
       movingCoords = [cx,cy];
       belowMoveColor = hex;
-      if (belowMoveColor == '#000000') {belowMoveColor = backgroundColor}
+      if (belowMoveColor == '#000000') {belowMoveColor = Jumper.backgroundColor}
       ctx.fillRect(cx+1, cy+1, cw-1, cw-1);
       return
     }
@@ -295,7 +298,7 @@ function reDrawMainCanvas(download_) {
   ctx3.clearRect(0, 0, canvas3.width, canvas3.height);
 
   // set background
-  ctx3.fillStyle = backgroundColor;
+  ctx3.fillStyle = Jumper.backgroundColor;
   ctx3.fillRect(p, p, Jumper.xpixels * cw + p, Jumper.ypixels*cw +p);
   
   // draw lines
@@ -405,13 +408,13 @@ function reDrawMainCanvas(download_) {
   //focus window
   if (focus) {
     ctx3.clearRect(0,topY, Jumper.xpixels * cw+p, bottomY - topY);
-    ctx3.fillStyle = backgroundColor;
+    ctx3.fillStyle = Jumper.backgroundColor;
     ctx3.fillRect(p, topY, Jumper.xpixels * cw + p, bottomY - topY);
     drawBoard(Jumper.xpixels, Jumper.ypixels, cw, ctx3, topY, bottomY, nrDeductions);
     
     for (const coords of filledRectsCanvas3NoDeductions) {
-      coordsArr = coords.split(',')
-      x = Number(coordsArr[1]); y = Number(coordsArr[0]); color = coordsArr[2];
+      let coordsArr = coords.split(',')
+      let x = Number(coordsArr[1]); let y = Number(coordsArr[0]); let color = coordsArr[2];
       x = x + (nrDeductions / 2) * cw;
 
       if (y < bottomY && y > topY - cw ) {
@@ -439,7 +442,8 @@ function changeBackground() {
   // change baclground function for html
   var newColour  = document.getElementById("background-color").value;
   backgroundColor = newColour;
-  changeCanvasBackground(ctxBottom, backgroundColor, smallCanvasHeight, smallCanvasWidth);
+  Jumper.backgroundColor = newColour
+  changeCanvasBackground(ctxBottom, Jumper.backgroundColor, smallCanvasHeight, smallCanvasWidth);
   reDrawMainCanvas();
   drawBoard(drawingCanvasWidth, drawingCanvasHeight, cw, ctxBottom);
 }
@@ -513,13 +517,19 @@ function changeDrawingCanvasSizes() {
 function clearCanvas(canvas, ctx, filledRects) {
   // clear the rects of a canvas
   for (const x of filledRects) {
-    coords = x.split(',');   
-    y_ = Number(coords[1]);
-    x_ = Number(coords[0]);
+    let coords = x.split(',');   
+    let y_ = Number(coords[1]);
+    let x_ = Number(coords[0]);
     ctx.clearRect(x_+1, y_+1, cw-1, cw-1);
   }
 }
 
+
+
+let clearDrawButton = document.getElementById('clearDraw')
+clearDrawButton.addEventListener('click', function(e) { 
+  clearDraw();
+})
 function clearDraw() {
   // button function to clear the drawing canvas
   clearCanvas(canvasBottom, ctxBottom, filledRectsCanvasBottom);
@@ -529,16 +539,21 @@ function clearDraw() {
   filledRectsCanvasTop = [];
 }
 
+
+let undoDrawButton = document.getElementById('undoDrawing')
+undoDrawButton.addEventListener('click', function(e) { 
+  undoDraw();
+})
 function undoDraw() {
   // button function to undo draw
   let lastPixel = filledRectsCanvasBottom[filledRectsCanvasBottom.length - 1];
   if (lastPixel) {
-    coords = lastPixel.split(',')
-    y_ = Number(coords[1]);
-    x_ = Number(coords[0]);
+    let coords = lastPixel.split(',')
+    let y_ = Number(coords[1]);
+    let x_ = Number(coords[0]);
     
-    ctxBottom.fillStyle = backgroundColor;
-    ctxTop.fillStyle = backgroundColor;
+    ctxBottom.fillStyle = Jumper.backgroundColor;
+    ctxTop.fillStyle = Jumper.backgroundColor;
     
     ctxBottom.fillRect(x_+1, y_+1, cw-1, cw-1)
     ctxTop.fillRect(x_+1, y_+1, cw-1, cw-1)
@@ -552,13 +567,13 @@ function undoDraw() {
 }
 
 let undoMainButton = document.getElementById('undoMain')
-undoMainButton.addEventListener('change', function(e) {
+undoMainButton.addEventListener('click', function(e) {
   undoMain()
 })
 
 function undoMain() {
   // button function to undo main
-  lastSize = mainPatternSizes[mainPatternSizes.length - 1];
+  let lastSize = mainPatternSizes[mainPatternSizes.length - 1];
   Jumper.filledRectsCanvas3.splice(Jumper.filledRectsCanvas3.length - lastSize);
   mainPatternSizes.pop();
   reDrawMainCanvas();
@@ -597,9 +612,9 @@ mainXelem.addEventListener('change', function(e) {
   changeMainX();
 })
 
-function changeMainX() {
+function changeMainX(value) {
   // button function change the X axis of main canvas
-  let mainX = document.getElementById("mainX").value;
+  let mainX = value || document.getElementById("mainX").value;
   mainCanvasWidth = mainX;
   Jumper.xpixels = mainX;
   changeMainCanvasSizes();
@@ -610,9 +625,9 @@ let mainYelem = document.getElementById('mainY')
 mainYelem.addEventListener('change', function(e) {
   changeMainY();
 })
-function changeMainY() {
+function changeMainY(value) {
   // button function change the Y axis of main canvas
-  let mainY = document.getElementById("mainY").value;
+  let mainY = value || document.getElementById("mainY").value;
   mainCanvasHeight = mainY;
   Jumper.ypixels = mainY
   reDrawMainCanvas();
@@ -754,6 +769,7 @@ changeChosenColorElem.addEventListener('change', function(e) {
 })
 function changeChosenColor() {
   let newColor = document.getElementById("hidden-color-change").value
+  
   let curDiv = document.getElementById(currentColorDivId)
   let oldColorRGB = curDiv.style.backgroundColor;
   var rgb = oldColorRGB.split("(")[1].split(")")[0].split(',');
@@ -763,7 +779,7 @@ function changeChosenColor() {
   drawingColor = newColor;
   for (let x = 0; x <= Jumper.filledRectsCanvas3.length - 1; x++) {
     let coords = Jumper.filledRectsCanvas3[x].split(',')
-    var rectColor = coords[2]; x_ = coords[1]; y_ = coords[0];pIX=coords[3]
+    var rectColor = coords[2]; var x_ = coords[1]; var y_ = coords[0]; var pIX=coords[3]
     if (rectColor == oldColorHex) {
       Jumper.filledRectsCanvas3[x] = [y_, x_, newColor, pIX].toString();
     }
@@ -772,6 +788,10 @@ function changeChosenColor() {
 }
 
 
+let movePatternButton = document.getElementById('movePattern')
+movePatternButton.addEventListener('click', function(e) { 
+  movePattern();
+})
 function movePattern() {
   movePattern_ = !movePattern_;
   if (movePattern_) {
@@ -794,7 +814,7 @@ nameElem.addEventListener('change', function(e) {
 function changeName() {
   let nameElem = document.getElementById('jumperName');
   Jumper.name = nameElem.value;
-  console.log(Jumper)
+
 }
 
 
@@ -980,6 +1000,7 @@ colorSelectDiv.addEventListener('dblclick', function(e) {
   currentColorDivId = e.target.id;
   if (currentColorDivId) {
     let curDiv = document.getElementById(currentColorDivId)
+    console.log(document.getElementById("hidden-color-change"))
     document.getElementById("hidden-color-change").focus();
     document.getElementById("hidden-color-change").value = "#FFCC00";
     document.getElementById("hidden-color-change").click();
@@ -1042,16 +1063,73 @@ span.onclick = function() {
 }
 
 // get the modal for the exsisting patterns
-
+var modalExsContent = document.getElementById('exsistingDesignsContainer')
 var modalExs = document.getElementById("existingDesignsModal");
 var btn = document.getElementById("exsistingButton");
 var span = document.getElementById("closeExistingDesignModal");
 btn.onclick = function() {
+  
   if (auth.currentUser) {
     modalExs.style.display = "block";
+
+  // this is where we load the existing designs
+    const q = query(collection(db, "jumpers"), where("creator", "==", auth.currentUser.uid),orderBy('createdAt','desc'));
+    async function getUserDocs() {
+      let patterns = {}
+      const querySnapshot = await getDocs(q);  
+      querySnapshot.forEach((doc) => {
+        let docId = doc.id;
+        let colors = doc.data().colors;
+        let name = doc.data().name;
+        patterns[docId] = doc.data();
+        
+        // add to the modular
+        let newDivParent = document.createElement("div");
+        
+        // div for the jumper
+        newDivParent.style.border = "1px solid black";
+        newDivParent.name = docId;
+        newDivParent.className = "exstModel";
+        newDivParent.style.overflow = "auto";
+
+        let newDivName = document.createElement("div");
+        newDivName.innerHTML = "<p>"+ name+"</p>";
+        newDivName.style.width = '30%';
+        newDivName.style.height = '70%';
+        newDivName.style.float = 'left';
+        newDivName.style.border = "1px solid black";
+        newDivName.name = docId;
+
+        // div for the colors 
+        let newDivColors = document.createElement("div");
+        newDivColors.style.width = '60%';
+        newDivColors.style.height = '70%';
+        newDivColors.style.float = 'right';
+        newDivColors.name = docId;
+        newDivColors.style.border = "1px solid black";
+
+        newDivParent.appendChild(newDivName);
+        newDivParent.appendChild(newDivColors);
+        for (const color of colors) {
+          const newDivColor = document.createElement("div");
+          newDivColor.style.float = 'right';
+          newDivColor.style.height = '35px';
+          newDivColor.style.width = '35px';
+          newDivColor.style.padding = '5px';
+          newDivColor.style.backgroundColor = color;
+          newDivColor.name = docId;
+          newDivColor.className = "float-child";
+          newDivColors.appendChild(newDivColor);
+        }
+
+        modalExsContent.appendChild(newDivParent);        
+      })
+    }
+    getUserDocs();
   }
   else {
     console.log('need to sign in to see previous models')
+    window.alert("Kirjaudu sisään nähdäksesi aikaisemmat työsi");
   }
 }
 span.onclick = function() {
@@ -1062,18 +1140,51 @@ span.onclick = function() {
 window.onclick = function(event) {
   if (event.target == modalMan) {
     modalMan.style.display = "none";
-    // console.log('here')
   }
   else if (event.target == modalLogin) {
     modalLogin.style.display = "none";
   }
   else if (event.target == modalExs) {
     modalExs.style.display = "none";
+    let existingContainer = document.getElementById('exsistingDesignsContainer')
+    existingContainer.innerHTML = ''
   }
-
 }
 
 
+function addNewPattern(uid) {
+  const docRef = addDoc(collection(db, "jumpers"), {
+    creator: uid,
+    name: Jumper.name,
+    id_: Jumper.id_,
+    createdAt: Date.now(),
+    colors: Jumper.colors,
+    deductions: Jumper.deductions,
+    filledRectsCanvas3: Jumper.filledRectsCanvas3,
+    ypixels: Jumper.ypixels,
+    xpixels: Jumper.xpixels,
+    windows: Jumper.windows,
+    backgroundColor: Jumper.backgroundColor
+  })
+}
+
+function resavePattern(uid, patternId) {
+  const docRef = setDoc(doc(db, "jumpers", patternId), {
+    creator: uid,
+    name: Jumper.name,
+    id_: Jumper.id_,
+    createdAt: Date.now(),
+    colors: Jumper.colors,
+    deductions: Jumper.deductions,
+    filledRectsCanvas3: Jumper.filledRectsCanvas3,
+    ypixels: Jumper.ypixels,
+    xpixels: Jumper.xpixels,
+    windows: Jumper.windows,
+    backgroundColor: Jumper.backgroundColor
+  }
+  
+  );
+}
 
 // saving and signing in things:
 let saveButton = document.getElementById('saveJumper')
@@ -1081,38 +1192,105 @@ saveButton.addEventListener('click', function(e) {
   
   if (auth.currentUser) { 
     let uid  = auth.currentUser.uid;
-    console.log('here',uid, Jumper.name);
-    const docRef = addDoc(collection(db, "jumpers"), {
-      name: Jumper.name,
-      id_: Jumper.id_,
-      createdAt: Jumper.createdAt,
-      colors: Jumper.colors,
-      deductions: Jumper.deductions,
-      filledRectsCanvas3: Jumper.filledRectsCanvas3,
-      ypixels: Jumper.ypixels,
-      xpixels: Jumper.xpixels,
-      windows: Jumper.windows
-    })
+    if (!Jumper.id_) {
+      if (Jumper.name) {
+        addNewPattern(uid);
+      }
+      else {
+        window.alert('Anna kuviollesi nimi jotta löydät sen helpommin')
+      }
+    }
+
+    else {
+       resavePattern(uid, Jumper.id_)
+    }
+
   }
   else {
+    window.alert("Kirjaudu sisään tallentaaksesi kuvion");
     console.log('you need to sign in to save')
   }
 })
 
-// let Jumper = {
-//   name: '',
-//   id_: '',
-//   createdAt: '',
-//   colors: [],
-//   // deductions: ['482,422', '482,47', '197,392', '197,137'],
-//   deductions: [],
-//   filledRectsCanvas3: [],
-//   // mainPatternHeight: mainCanvasHeight,
-//   // mainPatternWidth: mainCanvasHeight,
-//   ypixels: mainCanvasHeight,
-//   xpixels: mainCanvasWidth,
-  
+let saveAsButton = document.getElementById('saveJumperAs')
+saveAsButton.addEventListener('click', function(e) {
+  if (auth.currentUser) { 
+    let uid  = auth.currentUser.uid;
+    addNewPattern(uid);
 
-// console.log(db)
-// console.log(auth)
-// console.log(user)
+
+  }
+  else {
+    console.log('you need to sign in to save')
+    window.alert("Kirjaudu sisään tallentaaksesi kuvion");
+  }
+})
+
+let exsistingPatternsDiv = document.getElementById('existingDesignsModalContent')
+exsistingPatternsDiv.addEventListener('click', function(e) {
+  let jumperId = e.target.name;
+  async function getJumper() {
+    const docRef = doc(db, "jumpers", jumperId);
+    const docSnap = await getDoc(docRef);
+    let data = docSnap.data()
+    
+    Jumper.creator = data.creator;
+    Jumper.name = data.name;
+    Jumper.id_ = jumperId;
+    Jumper.colors = data.colors;
+    Jumper.deductions = data.deductions;
+    Jumper.filledRectsCanvas3 = data.filledRectsCanvas3;
+    Jumper.ypixels = data.ypixels;
+    Jumper.xpixels = data.xpixels;
+    Jumper.windows = data.windows;
+    Jumper.backgroundColor = data.backgroundColor;
+    reDrawMainCanvas();
+
+    let backgroundColorElem = document.getElementById("background-color");
+    backgroundColorElem.value = Jumper.backgroundColor
+
+    let currentColorId = 0;
+
+
+    let drawingColorsDiv = document.getElementById("drawing-color-divs");
+    var children = drawingColorsDiv.children;
+    for (var i = 0; i < children.length; i++) {
+      // var tableChild = children[i];
+      if (!children[i].id.includes('hidden')){
+        drawingColorsDiv.removeChild(children[i])
+
+      }
+      // Do stuff
+    }
+    // drawingColorsDiv.innerHTML = '<input type="color" id="hidden-color-change" tabindex=-1 class="hidden">'
+    // const myNode = document.getElementById("foo");
+    // while (drawingColorsDiv.firstChild) {
+      // if 
+        // myNode.removeChild(myNode.lastChild);
+    // }
+
+    
+    for (const color of data.colors) {
+      currentColorId += 1
+      let newDiv = document.createElement("div");
+      newDiv.style.background = color;
+      newDiv.style.border = "1px solid black";
+      newDiv.id = "color-"+String(currentColorId);
+      newDiv.className = "float-child";
+      drawingColorsDiv.appendChild(newDiv);
+    };
+    changeMainY(data.ypixels);
+    mainYelem.value = data.ypixels
+
+    changeMainX(data.xpixels);
+    mainXelem.value = data.xpixels;
+
+    nameElem.value = Jumper.name;
+
+
+
+  };
+  getJumper();
+  // Now, lets get the data
+
+})

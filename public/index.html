@@ -31,14 +31,14 @@
             <h1>Log in</h1>
                 <div>
                     <form onsubmit="return false">
-                        <label for="user-name">Username / Email</label>
+                        <label for="user-name">Sähköposti</label>
                         <input type="text" id="username" name="username"><br><br>
-                        <label for="Password">First name:</label>
+                        <label for="Password">Salasana</label>
                         <input type="password" id="password" name="password"><br><br>
                     </form>
                 </div>
                 <div>
-                    <button id="signin">Sign-In</button>
+                    <button id="signin">Kirjaudu Sisään</button>
                 </div>
                 <div>
                     <button id="signup">Luo Tili</button>
@@ -55,9 +55,12 @@
 
     <!-- existing designs modal -->
     <div id="existingDesignsModal" class="modalLogin">
-        <div class="modalLogin-content">
+        <div class="modalLogin-content" id="existingDesignsModalContent">
             <span class="close" id="closeExistingDesignModal">&times;</span>
             <h1>Aiemmat Mallit</h1>
+            <div id="exsistingDesignsContainer" class="exsistingDesignsContainer">
+
+            </div>
         </div>
         
     </div>
@@ -307,16 +310,16 @@
                 </select>
             </div>
             <div>
-                <button id="undoDrawing" onclick="undoDraw()">Takaisin</button>
-                <button id="clearDraw" onclick="clearDraw()">Tyhjennä</button>
-                <button id="movePattern" onclick="movePattern()">Siirrä</button>
+                <button id="undoDrawing">Takaisin</button>
+                <button id="clearDraw">Tyhjennä</button>
+                <button id="movePattern">Siirrä</button>
             </div>
         </div>
         <div id=div3Options class="div3Options">
             <h2>Pääkuvion Asetukset</h2>
             <div>
                 <label for="jumperName">Kuvion Nimi</label><br>
-                <input type="text" id="jumperName" name="jumperName" value="hyvaNimi"><br>
+                <input type="text" id="jumperName" name="jumperName" value=""><br>
             </div>
             <div>
                 <form onsubmit="return false">
@@ -335,6 +338,7 @@
                 <button id="drawOnMain">Värita Suoraan</button>
                 <button id="downloadLinkButton"><a id="downloadLnk" download="YourFileName.jpg">Lataa Kuvio</a>
                 <button id="saveJumper">Tallenna Kuvio</button>
+                <button id="saveJumperAs">Tallenna Kuvio Nimellä</button>
                 </button>
             </div>
         </div>
