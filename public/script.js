@@ -1097,7 +1097,7 @@ btn.onclick = function() {
         newDivName.style.width = '30%';
         newDivName.style.height = '70%';
         newDivName.style.float = 'left';
-        newDivName.style.border = "1px solid black";
+        // newDivName.style.border = "1px solid black";
         newDivName.name = docId;
 
         // div for the colors 
@@ -1106,7 +1106,7 @@ btn.onclick = function() {
         newDivColors.style.height = '70%';
         newDivColors.style.float = 'right';
         newDivColors.name = docId;
-        newDivColors.style.border = "1px solid black";
+        // newDivColors.style.border = "1px solid black";
 
         newDivParent.appendChild(newDivName);
         newDivParent.appendChild(newDivColors);
