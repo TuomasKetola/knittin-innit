@@ -35,10 +35,10 @@ let mainCanvasWidth = document.getElementById("mainX").value;
 // let mainCanvasWidth = 16;
 // let mainCanvasHeight = 42;
 let mainCanvasHeight = document.getElementById("mainY").value;
-let smallCanvasWidth = 4;
+let smallCanvasWidth = document.getElementById("drawingDims").value;
 let smallCanvasHeight = document.getElementById("smallY").value;;
 let drawingCanvasHeight = document.getElementById("smallY").value;;
-let drawingCanvasWidth = 4;
+let drawingCanvasWidth = smallCanvasWidth;
 
 let selectingColor = false;
 let findDeduction = false;
