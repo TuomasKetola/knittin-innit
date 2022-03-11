@@ -48,6 +48,7 @@ div{
   grid-column: 3 / 14;
   grid-row: 2 / 12;
   height: 1200px;
+  width: 780px;
   position: relative;
 }
 

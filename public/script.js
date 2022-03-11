@@ -52,15 +52,21 @@ let patternIX = 0;
 
 let isChecked = false;
 
-
+var ID = function () {
+  // Math.random should be unique because of its seeding algorithm.
+  // Convert it to base 36 (numbers + letters), and grab the first 9 characters
+  // after the decimal.
+  return '_' + Math.random().toString(36).substr(2, 9);
+};
 
 let backgroundColor = document.getElementById("background-color").value
 
 // Refactring of javascript:
 let Jumper = {
   creator: '',
+  creatorEmail: '',
   name: '',
-  id_: '',
+  id_: ID(),
   createdAt: '',
   colors: [],
   // deductions: ['482,422', '482,47', '197,392', '197,137'],
@@ -207,7 +213,9 @@ function clickDrawToCanvas(canvas, event, cw, ctx, filledRects) {
     if (find){
       
       const ix = filledRects.indexOf(new_coords);
-      ctx.clearRect(cx+1, cy+1, cw-1, cw-1);  
+      ctx.fillStyle = Jumper.backgroundColor
+      ctx.fillRect(cx+1, cy+1, cw-1, cw-1);  
+      ctx.fillStyle = drawingColor
       filledRects.splice(ix, 1)
       ctx.strokeStyle = "black";
       ctx.stroke();
@@ -520,7 +528,9 @@ function clearCanvas(canvas, ctx, filledRects) {
     let coords = x.split(',');   
     let y_ = Number(coords[1]);
     let x_ = Number(coords[0]);
-    ctx.clearRect(x_+1, y_+1, cw-1, cw-1);
+    ctx.fillStyle = Jumper.backgroundColor
+    ctx.fillRect(x_+1, y_+1, cw-1, cw-1);
+    ctx.fillStyle = drawingColor
   }
 }
 
@@ -1155,6 +1165,7 @@ window.onclick = function(event) {
 function addNewPattern(uid) {
   const docRef = addDoc(collection(db, "jumpers"), {
     creator: uid,
+    creatorEmail: Jumper.creatorEmail,
     name: Jumper.name,
     id_: Jumper.id_,
     createdAt: Date.now(),
@@ -1171,6 +1182,7 @@ function addNewPattern(uid) {
 function resavePattern(uid, patternId) {
   const docRef = setDoc(doc(db, "jumpers", patternId), {
     creator: uid,
+    creatorEmail: Jumper.creatorEmail,
     name: Jumper.name,
     id_: Jumper.id_,
     createdAt: Date.now(),
@@ -1192,9 +1204,13 @@ saveButton.addEventListener('click', function(e) {
   
   if (auth.currentUser) { 
     let uid  = auth.currentUser.uid;
+    Jumper.creatorEmail = auth.currentUser.email
     if (!Jumper.id_) {
       if (Jumper.name) {
-        addNewPattern(uid);
+        // addNewPattern(uid);
+        let jumpId = ID();
+        Jumper.id_ = jumpId
+        resavePattern(uid, Jumper.id_)
       }
       else {
         window.alert('Anna kuviollesi nimi jotta löydät sen helpommin')
@@ -1202,7 +1218,12 @@ saveButton.addEventListener('click', function(e) {
     }
 
     else {
-       resavePattern(uid, Jumper.id_)
+      if (Jumper.name) {
+        resavePattern(uid, Jumper.id_)
+      }
+      else {
+        window.alert('Anna kuviollesi nimi jotta löydät sen helpommin')
+      }
     }
 
   }
@@ -1215,9 +1236,12 @@ saveButton.addEventListener('click', function(e) {
 let saveAsButton = document.getElementById('saveJumperAs')
 saveAsButton.addEventListener('click', function(e) {
   if (auth.currentUser) { 
+    Jumper.creatorEmail = auth.currentUser.email
     let uid  = auth.currentUser.uid;
-    addNewPattern(uid);
-
+    // addNewPattern(uid);
+    let jumpId = ID();
+    Jumper.id_ = jumpId;
+    resavePattern(uid, Jumper.id_);
 
   }
   else {
@@ -1235,6 +1259,7 @@ exsistingPatternsDiv.addEventListener('click', function(e) {
     let data = docSnap.data()
     
     Jumper.creator = data.creator;
+    Jumper.creatorEmail = data.creatorEmail;
     Jumper.name = data.name;
     Jumper.id_ = jumperId;
     Jumper.colors = data.colors;
