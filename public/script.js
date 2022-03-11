@@ -579,6 +579,8 @@ function clearDraw() {
   changeCanvasBackground(ctxBottom, Jumper.backgroundColor, smallCanvasHeight, smallCanvasWidth);
   drawBoard(drawingCanvasWidth, drawingCanvasHeight, cw, ctxBottom);
   minY = 10000; maxY = 1; minX = 10000; maxX = 1;
+  filledRectsCanvasTop = [];
+  filledRectsCanvasBottom = [];
 }
 
 
