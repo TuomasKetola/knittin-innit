@@ -96,20 +96,22 @@ let Jumper = {
   windows: [],
   findWindows: function() {
     // go through deductions and make an array with {top: x, bottom:y, windowIX}
-    sortedDeductions = this.deductionsSortReverse();
-    yPrev = this.mainPatternHeightPx();
-    // yPrev = bottom
-    windowIx = 0
+    let sortedDeductions = this.deductionsSortReverse();
+    let yPrev = this.mainPatternHeightPx();
+    let windowIx = 0;
+    let nrDeductions = 0
     for (var dedStr of sortedDeductions) {
-      y = Number(dedStr.split(',')[0]);
+      
+      let y = Number(dedStr.split(',')[0]);
       if (y < yPrev) {
-        top_ = y;
-        this.windows.push({'top_':top_, 'bottom':yPrev, 'IX':windowIx})
-        windowIx += 1
+        let top_ = y;
+        this.windows.push({'top_':top_ + cw, 'bottom':yPrev + cw, 'IX':windowIx, 'nrDeductions':nrDeductions})
+        windowIx += 1;
       }
-      yPrev = y
+      yPrev = y;
+      nrDeductions += 1;
     }
-    this.windows.push({'top_':0, 'bottom':yPrev, 'IX':windowIx})
+    this.windows.push({'top_':0, 'bottom':yPrev + cw, 'IX':windowIx, 'nrDeductions':nrDeductions})
 },
 }
 
@@ -156,7 +158,7 @@ function drawBoard(gridWidth, gridHeight, cellWidth, ctx, Ytop, Ybottom, nrDeduc
   var xStart = (nrDeductions * cw) / 2 + p + 0.5 || 0.5 + p;
   var gridWidth  = gridWidth - nrDeductions || gridWidth
 
-  // vertical 
+  // vertical
   for (var x = 0; x <= cellWidth * gridWidth; x += cellWidth) {
       ctx.moveTo(xStart + x, top+p);
       ctx.lineTo(xStart + x, cw * gridHeight + top+p);
@@ -244,6 +246,9 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
   // drag and drop fig from canvas to another 
   let Xs = [];
   let Ys = [];
+  // if (fullPreview) {
+  //   return
+  // }
   for (const coordsString of filledRects){
     let coords = coordsString.split(',');
     Xs.push(Number(coords[0]));
@@ -430,8 +435,35 @@ function reDrawMainCanvas(download_) {
         ctx3.fillRect(x +1, y+1 , cw - 1, cw - 1)
     
       }
+    }
   }
-  }
+
+  // preview
+  // if (fullPreview){
+  //   Jumper.findWindows()
+  //   for (var win of Jumper.windows) {
+  //     console.log(win)
+  //     let topY = win['top_'];
+  //     let bottomY = win['bottom'];
+  //     let nrDeductions = win['nrDeductions'];
+  //     ctx3.clearRect(0,topY, Jumper.xpixels * cw+p, bottomY - topY);
+  //     ctx3.fillStyle = Jumper.backgroundColor;
+  //     ctx3.fillRect(p, topY, Jumper.xpixels * cw + p, bottomY - topY);
+  //     drawBoard(Jumper.xpixels, Jumper.ypixels, cw, ctx3, topY, bottomY, nrDeductions);
+      
+  //     for (const coords of filledRectsCanvas3NoDeductions) {
+  //       let coordsArr = coords.split(',')
+  //       let x = Number(coordsArr[1]); let y = Number(coordsArr[0]); let color = coordsArr[2];
+  //       x = x + (nrDeductions / 2) * cw;
+
+  //       if (y < bottomY && y > topY - cw ) {
+  //         ctx3.fillStyle = color
+  //         ctx3.fillRect(x +1, y+1 , cw - 1, cw - 1)
+      
+  //       }
+  //     }
+  //   }
+  // }
  
 }
 
@@ -542,11 +574,11 @@ clearDrawButton.addEventListener('click', function(e) {
 })
 function clearDraw() {
   // button function to clear the drawing canvas
-  clearCanvas(canvasBottom, ctxBottom, filledRectsCanvasBottom);
-  clearCanvas(canvasTop, ctxTop, filledRectsCanvasTop);
+  ctxBottom.clearRect(0, 0, canvasBottom.width, canvasBottom.height);
+  ctxTop.clearRect(0, 0, canvasBottom.width, canvasBottom.height);
+  changeCanvasBackground(ctxBottom, Jumper.backgroundColor, smallCanvasHeight, smallCanvasWidth);
+  drawBoard(drawingCanvasWidth, drawingCanvasHeight, cw, ctxBottom);
   minY = 10000; maxY = 1; minX = 10000; maxX = 1;
-  filledRectsCanvasBottom = [];
-  filledRectsCanvasTop = [];
 }
 
 
@@ -653,8 +685,11 @@ changeSmallYelem.addEventListener('change', function(e) {
   ctxTop.clearRect(0, 0, canvasTop.width, canvasTop.height);
   filledRectsCanvasBottom = []
   filledRectsCanvasTop = []
+  ctxBottom.fillStyle = Jumper.backgroundColor;
+  ctxBottom.fillRect(p, p, smallCanvasWidth * cw + p, smallCanvasHeight*cw +p);
   drawBoard(smallCanvasWidth, smallCanvasHeight, cw, ctxBottom);
-  drawBoard(smallCanvasWidth, smallCanvasHeight, cw, ctxTop);
+  // drawBoard(smallCanvasWidth, smallCanvasHeight, cw, ctxTop);
+  
 })
 
 function turnButtonOn(buttonId, color){
@@ -1042,6 +1077,20 @@ function download() {
 let downloadLnk  = document.getElementById('downloadLnk')
 downloadLnk.addEventListener('click', download, false);
 
+
+// esikatselu
+// let previewButton = document.getElementById('full-preview-button')
+// let fullPreview = false
+// previewButton.addEventListener('click', function(e) {
+//   fullPreview = !fullPreview
+//   if (fullPreview) {
+//     turnButtonOn('full-preview-button')
+//   }
+//   else {
+//     turnButtonOff('full-preview-button')
+//   }
+//   reDrawMainCanvas();
+// })
 
 
 
