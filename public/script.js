@@ -1,7 +1,12 @@
 import {db, auth, addDoc, collection, doc, getDocs,getDoc, query, where, setDoc, orderBy} from './firebaseThings.js'
 let filledRectsCanvasTop = [];
 let filledRectsCanvasBottom = [];
+let filledRectsCanvas3WithDeductions = [];
 let filledRectsCanvas2 = [];
+let patternToDelete = false
+let previousColorDel = false
+let coordsStrsToDeleteColor = [];
+let deletePressed = false;
 // let filledRectsCanvas3 = [];
 // let filledRectsCanvas3 = ['392,2,#00ff00', '377,17,#00ff00', '392,32,#00ff00', '377,47,#00ff00', '392,62,#00ff00', '377,77,#00ff00', '392,92,#00ff00', '377,122,#00ff00', '392,137,#00ff00', '377,152,#00ff00', '392,167,#00ff00', '377,182,#00ff00', '392,197,#00ff00', '377,212,#00ff00', '392,227,#00ff00', '377,242,#00ff00', '392,257,#00ff00', '377,272,#00ff00', '392,287,#00ff00', '377,302,#00ff00', '392,317,#00ff00', '377,332,#00ff00', '392,347,#00ff00', '377,362,#00ff00', '392,377,#00ff00', '377,392,#00ff00', '392,407,#00ff00', '377,437,#00ff00', '392,452,#00ff00', '377,467,#00ff00', '392,482,#00ff00', '377,497,#00ff00', '392,512,#00ff00', '377,527,#00ff00']
 // let filledRectsCanvas3NoDeductions = [];
@@ -48,7 +53,7 @@ let drawMain = false;
 let movePattern_ = false;
 let deductionYs = [];
 
-let patternIX = 0;
+
 
 let isChecked = false;
 
@@ -69,13 +74,13 @@ let Jumper = {
   name: '',
   id_: ID(),
   createdAt: '',
+  patternIX: 0,
   colors: [],
   // deductions: ['482,422', '482,47', '197,392', '197,137'],
   deductions: [],
   filledRectsCanvas3: [],
+  // filledRectsCanvas3: ['167,2,#f40b0b,1', '152,17,#f40b0b,1', '167,32,#f40b0b,1', '152,47,#f40b0b,1', '167,62,#f40b0b,1', '152,77,#f40b0b,1', '167,92,#f40b0b,1', '152,107,#f40b0b,1', '167,122,#f40b0b,1', '152,137,#f40b0b,1', '167,152,#f40b0b,1', '152,167,#f40b0b,1', '167,182,#f40b0b,1', '152,197,#f40b0b,1', '167,212,#f40b0b,1', '152,227,#f40b0b,1', '167,242,#f40b0b,1', '152,257,#f40b0b,1', '167,272,#f40b0b,1', '152,287,#f40b0b,1', '167,302,#f40b0b,1', '152,317,#f40b0b,1', '167,332,#f40b0b,1', '152,347,#f40b0b,1', '167,362,#f40b0b,1', '152,377,#f40b0b,1', '167,392,#f40b0b,1', '152,407,#f40b0b,1', '167,422,#f40b0b,1', '152,437,#f40b0b,1', '167,452,#f40b0b,1', '152,467,#f40b0b,1', '362,2,#f40b0b,2', '347,17,#f40b0b,2', '362,32,#f40b0b,2', '347,47,#f40b0b,2', '362,62,#f40b0b,2', '347,77,#f40b0b,2', '362,92,#f40b0b,2', '347,107,#f40b0b,2', '362,122,#f40b0b,2', '347,137,#f40b0b,2', '362,152,#f40b0b,2', '347,167,#f40b0b,2', '362,182,#f40b0b,2', '347,197,#f40b0b,2', '362,212,#f40b0b,2', '347,227,#f40b0b,2', '362,242,#f40b0b,2', '347,257,#f40b0b,2', '362,272,#f40b0b,2', '347,287,#f40b0b,2', '362,302,#f40b0b,2', '347,317,#f40b0b,2', '362,332,#f40b0b,2', '347,347,#f40b0b,2', '362,362,#f40b0b,2', '347,377,#f40b0b,2', '362,392,#f40b0b,2', '347,407,#f40b0b,2', '362,422,#f40b0b,2', '347,437,#f40b0b,2', '362,452,#f40b0b,2', '347,467,#f40b0b,2'],
   backgroundColor:backgroundColor,
-  // mainPatternHeight: mainCanvasHeight,
-  // mainPatternWidth: mainCanvasHeight,
   ypixels: mainCanvasHeight,
   xpixels: mainCanvasWidth,
   
@@ -113,8 +118,17 @@ let Jumper = {
       nrDeductions += 1;
     }
     this.windows.push({'top_':0, 'bottom':yPrev + cw, 'IX':windowIx, 'nrDeductions':nrDeductions})
-},
+  },
+  calculateCurrentPatternIX: function() {
+    let IXs = []
+    for (var coordsStr of this.filledRectsCanvas3){
+      let coords = coordsStr.split(',')
+      IXs.push(coords[3])
+    }
+    return Math.max(...IXs)
+  }
 }
+
 
 // get canvas to fit div
 function resizeCanvas(div, canvas){
@@ -265,7 +279,7 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
     moveSelected = false;
   }
 
-  patternIX += 1
+  Jumper.patternIX += 1
   const rect = canvas.getBoundingClientRect();
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
@@ -283,19 +297,19 @@ function drawFigToCanvas(canvas, event, cw, ctx, filledRects) {
   });
   const nrReps = mainCanvasWidth / shapeSize;
   let nrDeductions = nrDeducationsWindow(currentWindowIndex)
+
   if (mouseX > 0) { // make sure on the right canvas
     for(let i = 0; i <= nrReps - 1; i++) {  
       for (const x of sortedFilledRects) {
         let coords = x.split(',');
         let y_ = Number(coords[1]) - minY + mouseY - (mouseToDragY - minY);
         let x_= Number(coords[0]) + i * shapeSize * cw;
-        
         let color = coords[2];
          // dont draw outside canvas
         if (x_+1 < mainCanvasWidth * cw - nrDeductions * cw
           && y_ < currentWindowBotttom + cw && y_ > currentWindowTop
           && x_ > 0) {
-          let new_coordsMain = [y_, x_,color,patternIX].toString();
+          let new_coordsMain = [y_, x_,color,Jumper.patternIX].toString();
           Jumper.filledRectsCanvas3.push(new_coordsMain);
           patternSize += 1;
         }
@@ -342,23 +356,46 @@ function reDrawMainCanvas(download_) {
   
 
   let filledRectsCanvas3NoDeductions = [];
+  filledRectsCanvas3WithDeductions = [];
+
+  // sort out stupid padded patterns
+  let dedXsSorted = [];
+  for (var _x of dedXs) {
+    dedXsSorted.push(Number(_x))
+  };
+  
+  dedXsSorted.sort(function(a, b){return a-b});
+
+  let nextDedIX = 0;
   while (coordIx < Jumper.filledRectsCanvas3.length) {
     let coords = Jumper.filledRectsCanvas3[coordIx].split(',')
     let y_ = Number(coords[0]);
     let x_ = Number(coords[1]);
-    let pIX = Number(coords[3])
+    let pIX = Number(coords[3]);
     let color = coords[2];
     if (pIX > pIXPrevious) {
       addOn = 0
+      nextDedIX = 0;
     }
-    if (dedXs.includes(x_+addOn) && y_ <= deducationsDict[x_+addOn]){
-      addOn += cw;
+    if (x_+addOn >= dedXsSorted[nextDedIX]){
+      let deducationY = deducationsDict[dedXsSorted[nextDedIX]]
+      nextDedIX += 1;
+      if (y_ <= deducationY) {
+        addOn += cw;
+      }
     }
     else{
       filledRectsCanvas3NoDeductions.push([y_,x_, color].toString())
       coordIx += 1;
       ctx3.fillStyle = color;
-      ctx3.fillRect(x_+1 +addOn, y_+1, cw-1, cw-1);
+      if (pIX) {
+        ctx3.fillRect(x_+1 +addOn, y_+1, cw-1, cw-1);
+        filledRectsCanvas3WithDeductions.push([x_+addOn, y_, color, pIX].toString());
+      }
+      else {
+        ctx3.fillRect(x_+1, y_+1, cw-1, cw-1);
+        filledRectsCanvas3WithDeductions.push([x_, y_, color, pIX].toString());
+      }
     }
     pIXPrevious = pIX
   }
@@ -550,7 +587,8 @@ function changeDrawingCanvasSizes() {
   ctxBottom.clearRect(0, 0, canvasBottom.width, canvasBottom.height);
   ctxTop.clearRect(0, 0, canvasBottom.width, canvasBottom.height);
   drawBoard(drawingCanvasWidth, drawingCanvasHeight, cw, ctxBottom);
-  filledRectsCanvasBottom = []; filledRectsCanvasTop = []; minY = 10000; maxY = 1; minX = 10000; maxX = 1;
+  filledRectsCanvasBottom = []; filledRectsCanvasTop = []
+  minY = 10000; maxY = 1; minX = 10000; maxX = 1;
   changeBackground();
   reDrawMainCanvas();
 }
@@ -608,6 +646,17 @@ function undoDraw() {
     
     ctxBottom.fillRect(movingCoords[0]+1, movingCoords[1]+1, cw-1, cw-1)
     ctxTop.fillRect(movingCoords[0]+1, movingCoords[1]+1, cw-1, cw-1)
+    let Xs = [];
+    let Ys = [];
+    for (const coordsString of filledRectsCanvasBottom){
+      let coords = coordsString.split(',');
+      Xs.push(Number(coords[0]));
+      Ys.push(Number(coords[1]))
+    }
+    minX = p;
+    maxX = Math.max(...Xs);
+    minY = Math.min(...Ys);
+    maxY = Math.max(...Ys);
   }
 }
 
@@ -743,8 +792,7 @@ function drawOnMainOn(){
     if (focus){focus=false};
 
   }
-  else {turnButtonOff("drawOnMain")}
-  reDrawMainCanvas();
+  else {turnButtonOff("drawOnMain")};
 }
 
 function nrDeducationsWindow(windowIx) {  
@@ -832,6 +880,12 @@ function changeChosenColor() {
       Jumper.filledRectsCanvas3[x] = [y_, x_, newColor, pIX].toString();
     }
   };
+  for (var i=0; i<coordsStrsToDeleteColor.length;i++ ) {
+    if (coordsStrsToDeleteColor[i] == oldColorHex) {
+      coordsStrsToDeleteColor[i] = newColor
+    }
+  }
+  // coordsStrsToDeleteColor
   reDrawMainCanvas();
 }
 
@@ -925,6 +979,24 @@ canvas3.addEventListener('click', function(e) {
 
   }
 
+  else if (deletePressed) {
+      deletePressed = !deletePressed;
+      turnButtonOff('deletePattern');
+      let delIndex = 0
+      for (let coordsStr of Jumper.filledRectsCanvas3) {
+        let coords = coordsStr.split(',')
+        let x_ = Number(coords[1]); let y_ = Number(coords[0]); let color = coords[2]; let pIX = coords[3];
+        if (pIX == patternToDelete) {
+          let newCoordString = [y_,x_,coordsStrsToDeleteColor[delIndex], pIX].toString()
+          Jumper.filledRectsCanvas3[delIndex] = newCoordString;
+        }
+          delIndex += 1;
+        }
+        coordsStrsToDeleteColor = [];
+        patternToDelete = false;
+
+      }  
+
   // click to add deduction
   else if (addingDeduction){
     
@@ -957,23 +1029,22 @@ canvas3.addEventListener('click', function(e) {
     const y = e.clientY - rect.top;
     const cy = (y - (y%cw)) + p;
     const cx = (x - (x%cw)) + p;
-    let new_coords = [cy, cx,drawingColor].toString();
+    let new_coords = [cy, cx, drawingColor].toString();
     const find = Jumper.filledRectsCanvas3.includes(new_coords);
-
     if (cx < mainCanvasWidth * cw && cy < mainCanvasHeight * cw) { 
       
       if (!find) {
-        Jumper.filledRectsCanvas3.push(new_coords) ;
+        Jumper.filledRectsCanvas3.push(new_coords);
         Jumper.mainPatternSizes.push(1)
       }
       else {
-        
         const replaceIx = Jumper.filledRectsCanvas3.indexOf(new_coords);
         if (replaceIx > -1) {Jumper.filledRectsCanvas3.splice(replaceIx, 1)};
 
       }
     }
   }
+  
 
   // click to move pattern
   else if (movePattern_) {
@@ -1022,9 +1093,8 @@ canvas3.addEventListener('click', function(e) {
       }
       previousY = y_;
     };
-
+    
   };
-
   let nrDeductions = nrDeducationsWindow(currentWindowIndex);
   changeMainCanvasSizes(nrDeductions);
   reDrawMainCanvas()
@@ -1048,7 +1118,6 @@ colorSelectDiv.addEventListener('dblclick', function(e) {
   currentColorDivId = e.target.id;
   if (currentColorDivId) {
     let curDiv = document.getElementById(currentColorDivId)
-    console.log(document.getElementById("hidden-color-change"))
     document.getElementById("hidden-color-change").focus();
     document.getElementById("hidden-color-change").value = "#FFCC00";
     document.getElementById("hidden-color-change").click();
@@ -1324,6 +1393,8 @@ exsistingPatternsDiv.addEventListener('click', function(e) {
     Jumper.windows = data.windows;
     Jumper.backgroundColor = data.backgroundColor;
     Jumper.mainPatternSizes = data.mainPatternSizes
+    Jumper.patternIX = Jumper.calculateCurrentPatternIX() + 1;
+    console.log(Jumper.patternIX)
     reDrawMainCanvas();
 
     let backgroundColorElem = document.getElementById("background-color");
@@ -1372,5 +1443,72 @@ exsistingPatternsDiv.addEventListener('click', function(e) {
   };
   getJumper();
   // Now, lets get the data
+
+})
+
+
+
+
+
+// poista kuvio
+
+
+let deleteButton = document.getElementById('deletePattern')
+
+
+deleteButton.addEventListener('click', function(e) {
+  deletePressed = !deletePressed;
+  if (!deletePressed) {
+    turnButtonOff('deletePattern');
+    var filtered = Jumper.filledRectsCanvas3.filter(function(el) { return el.split(',')[3] != patternToDelete; }); 
+    Jumper.filledRectsCanvas3 = filtered
+  }
+  patternToDelete = false;
+  previousColorDel = false;
+  reDrawMainCanvas();
+})
+
+
+
+canvas3.addEventListener('dblclick', function(e) {
+  const rect = canvas3.getBoundingClientRect();
+  const xDel = e.clientX - rect.left;
+  const yDel = e.clientY - rect.top;
+  const cyDel = (yDel - (yDel%cw)) + p;
+  const cxDel = (xDel - (xDel%cw)) + p;
+  patternToDelete = false;
+  coordsStrsToDeleteColor = [];
+
+  const reverseFilled = [...filledRectsCanvas3WithDeductions].reverse();
+  for (let coordsStr of reverseFilled) {
+    let coords = coordsStr.split(',');
+    let x_del = Number(coords[0]); let y_del = Number(coords[1]); let colorDel = coords[2]; let pIXDel = coords[3];
+    if  (cyDel == y_del && cxDel == x_del) {
+      patternToDelete = pIXDel;
+    }
+  }
+
+
+  
+  let delIndex = 0
+  for (let coordsStr of Jumper.filledRectsCanvas3) {
+    let coords = coordsStr.split(',')
+    let x_ = Number(coords[1]); let y_ = Number(coords[0]); let color = coords[2]; let pIX = coords[3];
+    coordsStrsToDeleteColor.push(color)
+    if (pIX == patternToDelete) {
+      let newCoordString = [y_,x_,'#FF9494', pIX].toString()
+      Jumper.filledRectsCanvas3[delIndex] = newCoordString;
+    }
+    else{ 
+      Jumper.filledRectsCanvas3[delIndex] = coordsStr;
+    }
+    delIndex += 1;
+  }
+  reDrawMainCanvas();
+  if (patternToDelete) {
+    // makePopUpButton(popUpButtonX + rect.left, popUpButtonY+rect.top);
+    deletePressed = true
+    turnButtonOn('deletePattern', '#FF9494')
+  }
 
 })
