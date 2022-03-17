@@ -1394,7 +1394,6 @@ exsistingPatternsDiv.addEventListener('click', function(e) {
     Jumper.backgroundColor = data.backgroundColor;
     Jumper.mainPatternSizes = data.mainPatternSizes
     Jumper.patternIX = Jumper.calculateCurrentPatternIX() + 1;
-    console.log(Jumper.patternIX)
     reDrawMainCanvas();
 
     let backgroundColorElem = document.getElementById("background-color");
